@@ -432,7 +432,7 @@ const style = `
 `;
 
 const SYSTEM_PROMPT = `You are Shufud, a friendly and creative recipe assistant with deep knowledge of Nigerian and West African cuisine.
-When given a list of ingredients, suggest 3 recipes. ALWAYS include at least 1 Nigerian or West African dish if the ingredients can support it (e.g. Jollof Rice, Egusi Soup, Pepper Soup, Efo Riro, Moi Moi, Suya, Akara, Puff Puff, Ofada Stew, Banga Soup, Ofe Onugbu, Fried Plantain, etc.).
+When given a list of ingredients, suggest 2 recipes. ALWAYS include at least 1 Nigerian or West African dish if the ingredients can support it (e.g. Jollof Rice, Egusi Soup, Pepper Soup, Efo Riro, Moi Moi, Suya, Akara, Puff Puff, Ofada Stew, Banga Soup, Ofe Onugbu, Fried Plantain, etc.).
 If the ingredients strongly suggest African cooking (palm oil, crayfish, ogiri, iru, ugwu, stockfish, yam, plantain, etc.), make 2 or more recipes Nigerian/African.
 Respond ONLY with valid JSON in this exact format:
 {
@@ -497,7 +497,7 @@ export default function RecipeApp() {
 
     const userMsg = `I have these ingredients: ${ingredients.join(", ")}.
 Meal type: ${mealType}. Dietary restriction: ${dietary}.
-Suggest 3 recipes I can make.`;
+Suggest 2 recipes I can make.`;
 
     try {
       const res = await fetch("/api/recipes", {
