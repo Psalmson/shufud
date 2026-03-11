@@ -6,86 +6,128 @@ const style = `
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --saffron: #E8A020;
-    --tangerine: #E06820;
-    --magenta: #B8185A;
-    --gold: #D4922A;
-    --lime: #7AB830;
-    --crimson: #CC1818;
-    --forest-green: #2A8C18;
-    --bg: #FFF8F0;
-    --warm-white: #FFFCF8;
-    --charcoal: #1A1008;
-    --muted: #7A5C3A;
-    --border: #F0D8B8;
-    --tag-bg: #FFF0D8;
-    --card-shadow: 0 4px 24px rgba(232,160,32,0.12);
+    --green: #2E5339;
+    --green-light: #3a6647;
+    --green-pale: #f0f5f1;
+    --orange: #FF570A;
+    --orange-light: #ff7033;
+    --orange-pale: #fff3ee;
+    --teal: #05B2DC;
+    --teal-light: #29c4e8;
+    --teal-pale: #edfaff;
+    --bg: #f8faf8;
+    --warm-white: #ffffff;
+    --charcoal: #0f1f14;
+    --muted: #4a6655;
+    --border: #d4e2d8;
+    --card-shadow: 0 4px 24px rgba(46,83,57,0.10);
   }
 
   body { font-family: 'DM Mono', monospace; background: var(--bg); color: var(--charcoal); min-height: 100vh; }
   .app { max-width: 900px; margin: 0 auto; padding: 0 24px 80px; }
 
+  /* ── HEADER ── */
   .header { text-align: center; padding: 48px 0 32px; }
-  .header-accent { display: flex; justify-content: center; gap: 6px; margin-bottom: 20px; }
-  .header-accent span { display: block; height: 4px; border-radius: 2px; }
-  .header h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.8rem, 6vw, 4rem); color: var(--tangerine); line-height: 1; letter-spacing: -1px; text-shadow: 3px 3px 0px rgba(232,104,32,0.15); }
-  .header h1 em { color: var(--magenta); font-style: italic; }
+
+  .header-accent {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 24px;
+    border-radius: 4px;
+    overflow: hidden;
+    width: 120px;
+    margin-left: auto;
+    margin-right: auto;
+    height: 5px;
+  }
+  .header-accent span { display: block; height: 5px; }
+
+  .header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.8rem, 6vw, 4rem);
+    color: var(--green);
+    line-height: 1;
+    letter-spacing: -1px;
+  }
+  .header h1 em { color: var(--orange); font-style: italic; }
+
   .header-sub { margin-top: 10px; color: var(--muted); font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; }
+
   .cuisine-tags { display: flex; justify-content: center; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
   .cuisine-tag { font-size: 0.68rem; padding: 5px 12px; border-radius: 20px; letter-spacing: 0.04em; font-weight: 500; }
-  .ct-1 { background: var(--saffron); color: white; }
-  .ct-2 { background: var(--magenta); color: white; }
-  .ct-3 { background: var(--lime); color: white; }
-  .ct-4 { background: var(--crimson); color: white; }
-  .ct-5 { background: var(--tangerine); color: white; }
-  .nigerian-badge { margin-top: 12px; font-size: 0.7rem; color: var(--magenta); letter-spacing: 0.08em; font-weight: 500; }
+  .ct-1 { background: var(--orange); color: white; }
+  .ct-2 { background: var(--green); color: white; }
+  .ct-3 { background: var(--teal); color: white; }
+  .ct-4 { background: var(--orange); color: white; opacity: 0.85; }
+  .ct-5 { background: var(--green); color: white; opacity: 0.8; }
 
+  .nigerian-badge { margin-top: 12px; font-size: 0.7rem; color: var(--teal); letter-spacing: 0.08em; font-weight: 500; }
+
+  /* ── TABS ── */
   .tabs { display: flex; background: var(--warm-white); border: 2px solid var(--border); border-radius: 14px; padding: 4px; margin-bottom: 32px; gap: 4px; }
   .tab { flex: 1; padding: 10px 20px; font-family: 'DM Mono', monospace; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); cursor: pointer; border-radius: 10px; border: none; background: transparent; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 500; }
-  .tab:hover { background: var(--tag-bg); color: var(--tangerine); }
-  .tab.active { background: var(--tangerine); color: white; box-shadow: 0 2px 12px rgba(224,104,32,0.35); }
-  .tab-badge { background: var(--magenta); color: white; font-size: 0.6rem; padding: 2px 6px; border-radius: 10px; min-width: 18px; text-align: center; }
+  .tab:hover { background: var(--orange-pale); color: var(--orange); }
+  .tab.active { background: var(--orange); color: white; box-shadow: 0 2px 12px rgba(255,87,10,0.35); }
+  .tab-badge { background: var(--teal); color: white; font-size: 0.6rem; padding: 2px 6px; border-radius: 10px; min-width: 18px; text-align: center; }
 
+  /* ── CARDS ── */
   .card { background: var(--warm-white); border: 1.5px solid var(--border); border-radius: 18px; padding: 24px; margin-bottom: 20px; box-shadow: var(--card-shadow); }
   .input-label { font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; display: block; font-weight: 500; }
   .input-row { display: flex; gap: 10px; margin-bottom: 16px; }
-  .text-input { flex: 1; padding: 12px 16px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--bg); font-family: 'DM Mono', monospace; font-size: 0.85rem; color: var(--charcoal); outline: none; transition: border-color 0.2s; }
-  .text-input:focus { border-color: var(--saffron); box-shadow: 0 0 0 3px rgba(232,160,32,0.12); }
-  .text-input::placeholder { color: #C8A880; }
 
+  .text-input { flex: 1; padding: 12px 16px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--bg); font-family: 'DM Mono', monospace; font-size: 0.85rem; color: var(--charcoal); outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+  .text-input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(5,178,220,0.12); }
+  .text-input::placeholder { color: #9ab5a2; }
+
+  /* ── BUTTONS ── */
   .btn { padding: 12px 20px; border: none; border-radius: 10px; font-family: 'DM Mono', monospace; font-size: 0.82rem; cursor: pointer; transition: all 0.2s; white-space: nowrap; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; }
-  .btn-primary { background: var(--tangerine); color: white; }
-  .btn-primary:hover:not(:disabled) { background: #D05818; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(224,104,32,0.35); }
-  .btn-secondary { background: var(--magenta); color: white; }
-  .btn-secondary:hover { background: #A01050; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(184,24,90,0.35); }
-  .btn-ghost { background: transparent; border: 1.5px solid var(--border); color: var(--muted); }
-  .btn-ghost:hover { border-color: var(--tangerine); color: var(--tangerine); }
-  .btn-danger { background: transparent; border: 1.5px solid var(--border); color: var(--muted); }
-  .btn-danger:hover { border-color: var(--crimson); color: var(--crimson); background: #FFF0F0; }
-  .btn-icon { padding: 7px 12px; font-size: 0.72rem; border-radius: 8px; }
-  .btn-full { width: 100%; padding: 16px; font-family: 'Playfair Display', serif; font-size: 1.05rem; justify-content: center; border-radius: 12px; }
-  .btn-full:disabled { opacity: 0.5; cursor: not-allowed; }
-  .btn-pantry { background: var(--forest-green); color: white; margin-top: 12px; }
-  .btn-pantry:hover:not(:disabled) { background: #228014; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(42,140,24,0.3); }
 
+  .btn-primary { background: var(--orange); color: white; }
+  .btn-primary:hover:not(:disabled) { background: var(--orange-light); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(255,87,10,0.35); }
+
+  .btn-secondary { background: var(--teal); color: white; }
+  .btn-secondary:hover { background: var(--teal-light); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(5,178,220,0.35); }
+
+  .btn-green { background: var(--green); color: white; }
+  .btn-green:hover:not(:disabled) { background: var(--green-light); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(46,83,57,0.3); }
+
+  .btn-ghost { background: transparent; border: 1.5px solid var(--border); color: var(--muted); }
+  .btn-ghost:hover { border-color: var(--teal); color: var(--teal); }
+
+  .btn-danger { background: transparent; border: 1.5px solid var(--border); color: var(--muted); }
+  .btn-danger:hover { border-color: var(--orange); color: var(--orange); background: var(--orange-pale); }
+
+  .btn-icon { padding: 7px 12px; font-size: 0.72rem; border-radius: 8px; }
+
+  .btn-full { width: 100%; padding: 16px; font-family: 'Playfair Display', serif; font-size: 1.05rem; justify-content: center; border-radius: 12px; letter-spacing: 0.02em; }
+  .btn-full:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+  .btn-pantry { background: var(--green); color: white; margin-top: 12px; }
+  .btn-pantry:hover:not(:disabled) { background: var(--green-light); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(46,83,57,0.3); }
+
+  /* ── TAGS ── */
   .tags { display: flex; flex-wrap: wrap; gap: 8px; min-height: 28px; }
-  .tag { background: var(--tag-bg); border: 1.5px solid var(--border); border-radius: 20px; padding: 5px 12px 5px 14px; font-size: 0.78rem; color: var(--charcoal); display: flex; align-items: center; gap: 8px; animation: tagIn 0.2s ease; }
+  .tag { background: var(--teal-pale); border: 1.5px solid #b8eaf5; border-radius: 20px; padding: 5px 12px 5px 14px; font-size: 0.78rem; color: var(--charcoal); display: flex; align-items: center; gap: 8px; animation: tagIn 0.2s ease; }
   @keyframes tagIn { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
   .tag-remove { cursor: pointer; color: var(--muted); font-size: 1rem; line-height: 1; transition: color 0.15s; }
-  .tag-remove:hover { color: var(--crimson); }
+  .tag-remove:hover { color: var(--orange); }
 
+  /* ── SELECTS ── */
   .options-row { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
-  .select-input { padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--bg); font-family: 'DM Mono', monospace; font-size: 0.78rem; color: var(--charcoal); outline: none; cursor: pointer; flex: 1; min-width: 140px; }
-  .select-input:focus { border-color: var(--saffron); }
+  .select-input { padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--bg); font-family: 'DM Mono', monospace; font-size: 0.78rem; color: var(--charcoal); outline: none; cursor: pointer; flex: 1; min-width: 140px; transition: border-color 0.2s; }
+  .select-input:focus { border-color: var(--teal); }
 
+  /* ── SPINNER ── */
   .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  .results-header { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--tangerine); margin-bottom: 20px; display: flex; align-items: center; gap: 12px; }
+  /* ── RESULTS ── */
+  .results-header { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--green); margin-bottom: 20px; display: flex; align-items: center; gap: 12px; }
   .results-header::after { content: ''; flex: 1; height: 2px; background: linear-gradient(to right, var(--border), transparent); }
 
-  .recipe-card { background: var(--warm-white); border: 1.5px solid var(--border); border-radius: 18px; margin-bottom: 16px; overflow: hidden; box-shadow: var(--card-shadow); animation: cardIn 0.35s ease both; transition: box-shadow 0.2s; }
-  .recipe-card:hover { box-shadow: 0 8px 32px rgba(232,160,32,0.2); }
+  .recipe-card { background: var(--warm-white); border: 1.5px solid var(--border); border-radius: 18px; margin-bottom: 16px; overflow: hidden; box-shadow: var(--card-shadow); animation: cardIn 0.35s ease both; transition: box-shadow 0.2s, border-color 0.2s; }
+  .recipe-card:hover { box-shadow: 0 8px 32px rgba(46,83,57,0.15); border-color: #b8d4c0; }
   @keyframes cardIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
   .recipe-card:nth-child(2) { animation-delay: 0.08s; }
   .recipe-card:nth-child(3) { animation-delay: 0.16s; }
@@ -94,66 +136,76 @@ const style = `
   .recipe-title-group { flex: 1; }
   .recipe-name { font-family: 'Playfair Display', serif; font-size: 1.2rem; color: var(--charcoal); margin-bottom: 8px; line-height: 1.3; }
   .recipe-meta { display: flex; gap: 8px; flex-wrap: wrap; }
-  .meta-pill { font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); background: var(--tag-bg); border: 1px solid var(--border); padding: 3px 10px; border-radius: 20px; font-weight: 500; }
-  .meta-pill.nigerian { background: var(--tangerine); color: white; border-color: var(--tangerine); }
-  .meta-pill.match { background: var(--lime); color: white; border-color: var(--lime); }
-  .meta-pill.time { background: var(--saffron); color: white; border-color: var(--saffron); }
+
+  .meta-pill { font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); background: var(--green-pale); border: 1px solid var(--border); padding: 3px 10px; border-radius: 20px; font-weight: 500; }
+  .meta-pill.nigerian { background: var(--green); color: white; border-color: var(--green); }
+  .meta-pill.match { background: var(--teal); color: white; border-color: var(--teal); }
+  .meta-pill.time { background: var(--orange); color: white; border-color: var(--orange); }
+
   .expand-icon { color: var(--muted); font-size: 1.2rem; transition: transform 0.25s; flex-shrink: 0; margin-top: 4px; }
-  .expand-icon.open { transform: rotate(180deg); color: var(--tangerine); }
+  .expand-icon.open { transform: rotate(180deg); color: var(--orange); }
 
   .recipe-body { padding: 0 24px 24px; border-top: 1.5px solid var(--border); }
-  .recipe-body h4 { font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--magenta); margin: 18px 0 10px; font-weight: 600; }
+  .recipe-body h4 { font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--teal); margin: 18px 0 10px; font-weight: 600; }
   .recipe-desc { font-size: 0.83rem; color: var(--muted); line-height: 1.65; margin-top: 12px; }
+
   .ingredients-list { display: flex; flex-wrap: wrap; gap: 6px; }
   .ing-pill { font-size: 0.75rem; padding: 4px 12px; border-radius: 16px; border: 1.5px solid var(--border); background: var(--bg); color: var(--charcoal); }
-  .ing-pill.have { background: #F0FFF0; border-color: var(--lime); color: var(--forest-green); }
+  .ing-pill.have { background: var(--teal-pale); border-color: var(--teal); color: #037a97; }
+
   .steps-list { list-style: none; counter-reset: steps; }
   .steps-list li { counter-increment: steps; display: flex; gap: 14px; margin-bottom: 12px; font-size: 0.82rem; line-height: 1.7; color: var(--charcoal); }
-  .steps-list li::before { content: counter(steps); background: var(--magenta); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; flex-shrink: 0; margin-top: 2px; font-weight: 700; }
+  .steps-list li::before { content: counter(steps); background: var(--orange); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; flex-shrink: 0; margin-top: 2px; font-weight: 700; }
 
+  /* ── MISC ── */
   .empty-state { text-align: center; padding: 60px 24px; color: var(--muted); font-size: 0.82rem; }
-  .empty-icon { font-size: 3rem; margin-bottom: 14px; opacity: 0.5; }
-  .error-box { background: #FFF0F0; border: 1.5px solid #FFCCCC; border-radius: 12px; padding: 14px 18px; color: var(--crimson); font-size: 0.82rem; margin-top: 12px; }
+  .empty-icon { font-size: 3rem; margin-bottom: 14px; opacity: 0.4; }
+  .error-box { background: var(--orange-pale); border: 1.5px solid #ffcfb8; border-radius: 12px; padding: 14px 18px; color: var(--orange); font-size: 0.82rem; margin-top: 12px; }
 
-  .telegram-note { margin-top: 40px; display: flex; gap: 16px; align-items: flex-start; background: linear-gradient(135deg, #F0FFF8, #FFF8F0); border-radius: 16px; padding: 20px 24px; border: 1.5px solid var(--lime); }
+  .telegram-note { margin-top: 40px; display: flex; gap: 16px; align-items: flex-start; background: var(--teal-pale); border-radius: 16px; padding: 20px 24px; border: 1.5px solid #b8eaf5; }
   .telegram-icon { font-size: 1.8rem; flex-shrink: 0; }
-  .telegram-note h3 { font-family: 'Playfair Display', serif; color: var(--forest-green); font-size: 1rem; margin-bottom: 4px; }
+  .telegram-note h3 { font-family: 'Playfair Display', serif; color: var(--green); font-size: 1rem; margin-bottom: 4px; }
   .telegram-note p { font-size: 0.76rem; color: var(--muted); line-height: 1.6; }
-  .telegram-note code { background: var(--tag-bg); padding: 1px 6px; border-radius: 4px; font-size: 0.85em; color: var(--tangerine); }
+  .telegram-note code { background: white; padding: 1px 6px; border-radius: 4px; font-size: 0.85em; color: var(--orange); border: 1px solid var(--border); }
 
+  /* ── PANTRY ── */
   .pantry-top-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
-  .pantry-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--tangerine); }
+  .pantry-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--green); }
   .pantry-title span { font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--muted); margin-left: 10px; }
   .pantry-actions { display: flex; gap: 8px; flex-wrap: wrap; }
   .pantry-add-row { display: flex; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
-  .category-select { padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--bg); font-family: 'DM Mono', monospace; font-size: 0.78rem; color: var(--charcoal); outline: none; cursor: pointer; min-width: 170px; }
-  .category-select:focus { border-color: var(--saffron); }
+  .category-select { padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--bg); font-family: 'DM Mono', monospace; font-size: 0.78rem; color: var(--charcoal); outline: none; cursor: pointer; min-width: 170px; transition: border-color 0.2s; }
+  .category-select:focus { border-color: var(--teal); }
 
   .pantry-categories { display: flex; flex-direction: column; gap: 16px; margin-top: 24px; }
-  .category-block { background: var(--warm-white); border: 1.5px solid var(--border); border-radius: 16px; overflow: hidden; box-shadow: var(--card-shadow); }
+  .category-block { background: var(--warm-white); border: 1.5px solid var(--border); border-radius: 16px; overflow: hidden; box-shadow: var(--card-shadow); transition: box-shadow 0.2s; }
+  .category-block:hover { box-shadow: 0 6px 24px rgba(46,83,57,0.12); }
+
   .category-heading { padding: 12px 18px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1.5px solid var(--border); }
   .category-heading-left { display: flex; align-items: center; gap: 10px; }
   .category-color-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
   .category-name-display { font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--charcoal); font-weight: 600; }
-  .category-name-input { font-size: 0.75rem; letter-spacing: 0.06em; color: var(--charcoal); font-weight: 600; border: 1.5px solid var(--saffron); border-radius: 6px; padding: 3px 10px; background: var(--bg); font-family: 'DM Mono', monospace; outline: none; width: 160px; }
-  .category-count { font-size: 0.65rem; color: var(--muted); background: var(--tag-bg); border: 1px solid var(--border); padding: 2px 8px; border-radius: 10px; }
+  .category-name-input { font-size: 0.75rem; letter-spacing: 0.06em; color: var(--charcoal); font-weight: 600; border: 1.5px solid var(--teal); border-radius: 6px; padding: 3px 10px; background: var(--bg); font-family: 'DM Mono', monospace; outline: none; width: 160px; }
+  .category-count { font-size: 0.65rem; color: var(--muted); background: var(--green-pale); border: 1px solid var(--border); padding: 2px 8px; border-radius: 10px; }
   .category-heading-right { display: flex; align-items: center; gap: 8px; }
-  .category-items { padding: 14px 18px; display: flex; flex-wrap: wrap; gap: 8px; min-height: 52px; }
-  .category-empty { color: #C8A880; font-size: 0.75rem; font-style: italic; }
-  .pantry-tag { background: var(--tag-bg); border: 1.5px solid var(--border); border-radius: 20px; padding: 5px 12px 5px 14px; font-size: 0.78rem; color: var(--charcoal); display: flex; align-items: center; gap: 8px; animation: tagIn 0.2s ease; transition: border-color 0.15s; }
-  .pantry-tag:hover { border-color: var(--saffron); }
 
-  .pantry-cook-section { margin-top: 24px; background: linear-gradient(135deg, #FFF8E8, #FFF0F8); border: 1.5px solid var(--saffron); border-radius: 16px; padding: 22px 24px; }
-  .pantry-cook-section h3 { font-family: 'Playfair Display', serif; color: var(--tangerine); font-size: 1.1rem; margin-bottom: 8px; }
+  .category-items { padding: 14px 18px; display: flex; flex-wrap: wrap; gap: 8px; min-height: 52px; }
+  .category-empty { color: #9ab5a2; font-size: 0.75rem; font-style: italic; }
+  .pantry-tag { background: var(--green-pale); border: 1.5px solid var(--border); border-radius: 20px; padding: 5px 12px 5px 14px; font-size: 0.78rem; color: var(--charcoal); display: flex; align-items: center; gap: 8px; animation: tagIn 0.2s ease; transition: border-color 0.15s; }
+  .pantry-tag:hover { border-color: var(--teal); }
+
+  .pantry-cook-section { margin-top: 24px; background: linear-gradient(135deg, var(--teal-pale), var(--green-pale)); border: 1.5px solid var(--teal); border-radius: 16px; padding: 22px 24px; }
+  .pantry-cook-section h3 { font-family: 'Playfair Display', serif; color: var(--green); font-size: 1.1rem; margin-bottom: 8px; }
   .pantry-cook-section p { font-size: 0.78rem; color: var(--muted); margin-bottom: 14px; line-height: 1.6; }
   .pantry-ingredient-preview { display: flex; flex-wrap: wrap; gap: 6px; }
-  .preview-pill { font-size: 0.72rem; padding: 3px 10px; border-radius: 14px; background: white; border: 1.5px solid var(--saffron); color: var(--tangerine); font-weight: 500; }
+  .preview-pill { font-size: 0.72rem; padding: 3px 10px; border-radius: 14px; background: white; border: 1.5px solid var(--teal); color: var(--teal); font-weight: 500; }
 
-  .modal-overlay { position: fixed; inset: 0; background: rgba(26,16,8,0.55); display: flex; align-items: center; justify-content: center; z-index: 100; animation: fadeIn 0.15s ease; }
+  /* ── MODAL ── */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(15,31,20,0.6); display: flex; align-items: center; justify-content: center; z-index: 100; animation: fadeIn 0.15s ease; }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-  .modal { background: var(--warm-white); border: 2px solid var(--border); border-radius: 20px; padding: 32px; width: 90%; max-width: 420px; box-shadow: 0 20px 60px rgba(26,16,8,0.2); animation: slideUp 0.2s ease; }
+  .modal { background: var(--warm-white); border: 2px solid var(--border); border-radius: 20px; padding: 32px; width: 90%; max-width: 420px; box-shadow: 0 20px 60px rgba(15,31,20,0.2); animation: slideUp 0.2s ease; }
   @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-  .modal h3 { font-family: 'Playfair Display', serif; color: var(--tangerine); font-size: 1.3rem; margin-bottom: 20px; }
+  .modal h3 { font-family: 'Playfair Display', serif; color: var(--green); font-size: 1.3rem; margin-bottom: 20px; }
   .modal-field { margin-bottom: 18px; }
   .modal-field label { font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 8px; font-weight: 500; }
   .color-picker-row { display: flex; gap: 10px; flex-wrap: wrap; }
@@ -161,23 +213,23 @@ const style = `
   .color-swatch:hover { transform: scale(1.15); }
   .color-swatch.selected { border-color: var(--charcoal); transform: scale(1.15); }
   .emoji-picker-row { display: flex; gap: 8px; flex-wrap: wrap; }
-  .emoji-opt { font-size: 1.4rem; cursor: pointer; padding: 6px; border-radius: 8px; border: 2px solid transparent; transition: all 0.15s; background: var(--tag-bg); }
-  .emoji-opt:hover { border-color: var(--saffron); transform: scale(1.1); }
-  .emoji-opt.selected { border-color: var(--tangerine); background: var(--bg); }
+  .emoji-opt { font-size: 1.4rem; cursor: pointer; padding: 6px; border-radius: 8px; border: 2px solid transparent; transition: all 0.15s; background: var(--green-pale); }
+  .emoji-opt:hover { border-color: var(--teal); transform: scale(1.1); }
+  .emoji-opt.selected { border-color: var(--orange); background: var(--orange-pale); }
   .modal-actions { display: flex; gap: 10px; margin-top: 24px; }
   .modal-actions .btn { flex: 1; justify-content: center; }
 `;
 
-const SWATCH_COLORS = ["#E8A020","#E06820","#B8185A","#D4922A","#7AB830","#CC1818","#2A8C18","#1870B8","#8818B8","#18A8B8"];
+const SWATCH_COLORS = ["#FF570A","#05B2DC","#2E5339","#3a6647","#ff7033","#29c4e8","#e04e00","#037a97","#1a3d25","#6aabbb"];
 const EMOJI_OPTIONS = ["🥩","🥬","🌾","🌶","🫙","🧺","🫚","🥚","🧅","🫛","🥦","🍅","🌽","🥜","🧄","🫘"];
 
 const DEFAULT_CATEGORIES = [
-  { key: "proteins", label: "Proteins", emoji: "🥩", color: "#E06820" },
-  { key: "vegetables", label: "Vegetables & Leaves", emoji: "🥬", color: "#7AB830" },
-  { key: "grains", label: "Grains & Carbs", emoji: "🌾", color: "#E8A020" },
-  { key: "spices", label: "Spices & Seasonings", emoji: "🌶", color: "#CC1818" },
-  { key: "oils", label: "Oils & Fats", emoji: "🫙", color: "#D4922A" },
-  { key: "others", label: "Others", emoji: "🧺", color: "#B8185A" },
+  { key: "proteins",   label: "Proteins",             emoji: "🥩", color: "#FF570A" },
+  { key: "vegetables", label: "Vegetables & Leaves",  emoji: "🥬", color: "#2E5339" },
+  { key: "grains",     label: "Grains & Carbs",       emoji: "🌾", color: "#05B2DC" },
+  { key: "spices",     label: "Spices & Seasonings",  emoji: "🌶", color: "#FF570A" },
+  { key: "oils",       label: "Oils & Fats",          emoji: "🫙", color: "#2E5339" },
+  { key: "others",     label: "Others",               emoji: "🧺", color: "#05B2DC" },
 ];
 
 const SYSTEM_PROMPT = `You are Shufud, a friendly and creative recipe assistant with deep knowledge of Nigerian and West African cuisine.
@@ -203,10 +255,11 @@ Be culturally authentic with Nigerian dishes.`;
 
 const isNigerian = (c) => c?.toLowerCase().includes("nigerian") || c?.toLowerCase().includes("african");
 
+/* ── ADD CATEGORY MODAL ─────────────────────────────────────────────────── */
 function AddCategoryModal({ onClose, onAdd }) {
   const [label, setLabel] = useState("");
   const [emoji, setEmoji] = useState("🧺");
-  const [color, setColor] = useState("#E8A020");
+  const [color, setColor] = useState("#FF570A");
 
   const handleAdd = () => {
     if (!label.trim()) return;
@@ -250,6 +303,7 @@ function AddCategoryModal({ onClose, onAdd }) {
   );
 }
 
+/* ── RECIPE TAB ─────────────────────────────────────────────────────────── */
 function RecipeTab({ pantryIngredients }) {
   const [input, setInput] = useState("");
   const [ingredients, setIngredients] = useState([]);
@@ -307,7 +361,7 @@ function RecipeTab({ pantryIngredients }) {
           <button className="btn btn-primary" onClick={addIngredient}>+ Add</button>
         </div>
         <div className="tags">
-          {ingredients.length === 0 && <span style={{ color: "#C8A880", fontSize: "0.78rem" }}>No ingredients added yet</span>}
+          {ingredients.length === 0 && <span style={{ color: "#9ab5a2", fontSize: "0.78rem" }}>No ingredients added yet</span>}
           {ingredients.map(ing => (
             <span key={ing} className="tag">{ing}
               <span className="tag-remove" onClick={() => removeIngredient(ing)}>×</span>
@@ -411,6 +465,7 @@ function RecipeTab({ pantryIngredients }) {
   );
 }
 
+/* ── PANTRY TAB ─────────────────────────────────────────────────────────── */
 function PantryTab({ pantry, setPantry, categories, setCategories }) {
   const [input, setInput] = useState("");
   const [selectedCat, setSelectedCat] = useState("proteins");
@@ -552,6 +607,7 @@ function PantryTab({ pantry, setPantry, categories, setCategories }) {
   );
 }
 
+/* ── MAIN APP ───────────────────────────────────────────────────────────── */
 export default function App() {
   const [activeTab, setActiveTab] = useState("recipes");
   const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
@@ -566,9 +622,9 @@ export default function App() {
       <div className="app">
         <header className="header">
           <div className="header-accent">
-            {[["#E8A020",60],["#E06820",40],["#B8185A",50],["#7AB830",35],["#CC1818",45]].map(([c,w],i) => (
-              <span key={i} style={{ background: c, width: w }} />
-            ))}
+            <span style={{ background: "#2E5339", flex: 1 }} />
+            <span style={{ background: "#FF570A", flex: 1 }} />
+            <span style={{ background: "#05B2DC", flex: 1 }} />
           </div>
           <h1><em>Shufud</em></h1>
           <p className="header-sub">Tell me what you have · I'll tell you what to cook</p>
