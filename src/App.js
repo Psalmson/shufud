@@ -1,4 +1,6 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { supabase } from "./supabaseClient";
+import Auth, { VerifyEmail } from "./Auth";
 
 const style = `
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400;500&display=swap');
@@ -614,7 +616,35 @@ export default function App() {
   const [pantry, setPantry] = useState({
     proteins: [], vegetables: [], grains: [], spices: [], oils: [], others: []
   });
+  const [session, setSession] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [verifyEmail, setVerifyEmail] = useState(null);
   const totalPantryItems = Object.values(pantry).flat().length;
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setAuthLoading(false);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setSession(null);
+  };
+
+  if (authLoading) return (
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f8faf8", fontFamily: "DM Mono, monospace", color: "#4a6655", fontSize: "0.85rem" }}>
+      Loading…
+    </div>
+  );
+
+  if (verifyEmail) return <VerifyEmail email={verifyEmail} onBack={() => setVerifyEmail(null)} />;
+  if (!session) return <Auth onVerify={(email) => setVerifyEmail(email)} />;
 
   return (
     <>
@@ -634,6 +664,9 @@ export default function App() {
             ))}
           </div>
           <p className="nigerian-badge">✦ Nigerian &amp; African cuisine featured</p>
+          <button onClick={handleSignOut} style={{ marginTop: "12px", background: "transparent", border: "1.5px solid var(--border)", borderRadius: "8px", padding: "6px 14px", fontFamily: "DM Mono, monospace", fontSize: "0.7rem", color: "var(--muted)", cursor: "pointer", letterSpacing: "0.06em" }}>
+            Sign Out
+          </button>
         </header>
 
         <div className="tabs">
