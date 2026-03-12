@@ -327,20 +327,58 @@ function RecipeTab({ pantryIngredients }) {
   const handleKeyDown = (e) => { if (e.key === "Enter" || e.key === ",") { e.preventDefault(); addIngredient(); } };
   const toggleExpand = (i) => setExpanded(p => ({ ...p, [i]: !p[i] }));
 
-  const fetchRecipes = async (ings) => {
-    if (!ings.length) return;
-    setLoading(true); setError(""); setRecipes([]); setExpanded({});
-    try {
-      const res = await fetch("/api/recipes", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-6",
-          max_tokens: 2000,
-          system: SYSTEM_PROMPT,
-          messages: [{ role: "user", content: `Ingredients: ${ings.join(", ")}. Meal: ${mealType}. Diet: ${dietary}. Suggest 2 recipes.` }]
-        })
-      });
+const fetchRecipes = async (ings) => {
+  if (!ings.length) return;
+  setLoading(true); setError(""); setRecipes([]); setExpanded({});
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.access_token;
+
+    const res = await fetch("/api/recipes", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 1200,
+        system: SYSTEM_PROMPT,
+        messages: [{ role: "user", content: `Ingredients: ${ings.join(", ")}. Meal: ${mealType}. Diet: ${dietary}. Suggest 2 recipes.` }]
+      })
+    });
+
+    const data = await res.json();
+
+    if (res.status === 429) {
+      setError(data.message);
+      return;
+    }
+
+    if (!res.ok) {
+      setError(`API Error: ${JSON.stringify(data?.details || data?.error)}`);
+      return;
+    }
+
+    const text = data.content?.map(b => b.text || "").join("") || "";
+    const parsed = JSON.parse(text.replace(/```json|```/g, "").trim());
+    setRecipes(parsed.recipes || []);
+    if (parsed.recipes?.length) setExpanded({ 0: true });
+
+    // Show remaining usage
+    if (data.usage_info) {
+      const { remaining } = data.usage_info;
+      if (remaining === 0) {
+        setError("That was your last recipe suggestion for today. Come back tomorrow!");
+      }
+    }
+
+  } catch (err) {
+    setError(`Error: ${err.message}`);
+  } finally {
+    setLoading(false);
+  }
+};
       const data = await res.json();
       if (!res.ok) { setError(`API Error: ${JSON.stringify(data?.details || data?.error)}`); return; }
       const text = data.content?.map(b => b.text || "").join("") || "";
