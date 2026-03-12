@@ -1,34 +1,127 @@
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
-  if (!process.env.ANTHROPIC_API_KEY) {
-    return res.status(500).json({ error: "ANTHROPIC_API_KEY is not set in environment variables" });
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return res.status(500).json({ error: "API key not configured" });
+
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    return res.status(500).json({ error: "Supabase not configured" });
   }
 
+  // ── Get user from auth header ──────────────────────────────────────────────
+  const authHeader = req.headers.authorization;
+  if (!authHeader) return res.status(401).json({ error: "Unauthorized" });
+
+  const token = authHeader.replace("Bearer ", "");
+
+  // Verify user with Supabase
+  const userRes = await fetch(`${supabaseUrl}/auth/v1/user`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      apikey: supabaseKey
+    }
+  });
+
+  const userData = await userRes.json();
+  if (!userData?.id) return res.status(401).json({ error: "Invalid session" });
+
+  const userId = userData.id;
+  const today = new Date().toISOString().split("T")[0];
+  const DAILY_LIMIT = 2;
+
+  // ── Check usage ────────────────────────────────────────────────────────────
+  const usageRes = await fetch(
+    `${supabaseUrl}/rest/v1/usage_tracking?user_id=eq.${userId}&date=eq.${today}`,
+    {
+      headers: {
+        apikey: supabaseKey,
+        Authorization: `Bearer ${supabaseKey}`,
+        "Content-Type": "application/json"
+      }
+    }
+  );
+
+  const usageData = await usageRes.json();
+  const currentUsage = usageData?.[0];
+  const currentCount = currentUsage?.count || 0;
+
+  if (currentCount >= DAILY_LIMIT) {
+    return res.status(429).json({
+      error: "daily_limit_reached",
+      message: `You've used your ${DAILY_LIMIT} free recipe suggestions for today. Come back tomorrow!`,
+      count: currentCount,
+      limit: DAILY_LIMIT
+    });
+  }
+
+  // ── Call Claude API ────────────────────────────────────────────────────────
   try {
+    const { model, max_tokens, system, messages } = req.body;
+
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": process.env.ANTHROPIC_API_KEY,
+        "x-api-key": apiKey,
         "anthropic-version": "2023-06-01"
       },
-      body: JSON.stringify(req.body)
+      body: JSON.stringify({ model, max_tokens, system, messages })
     });
 
     const data = await response.json();
-
     if (!response.ok) {
-      return res.status(response.status).json({ error: "Anthropic API error", details: data });
+      return res.status(response.status).json({ error: "Claude API error", details: data });
     }
 
-    res.status(200).json(data);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to fetch from Anthropic", details: error.message });
+    // ── Update usage count ───────────────────────────────────────────────────
+    if (currentUsage) {
+      // Update existing record
+      await fetch(
+        `${supabaseUrl}/rest/v1/usage_tracking?user_id=eq.${userId}&date=eq.${today}`,
+        {
+          method: "PATCH",
+          headers: {
+            apikey: supabaseKey,
+            Authorization: `Bearer ${supabaseKey}`,
+            "Content-Type": "application/json",
+            Prefer: "return=minimal"
+          },
+          body: JSON.stringify({ count: currentCount + 1 })
+        }
+      );
+    } else {
+      // Insert new record
+      await fetch(`${supabaseUrl}/rest/v1/usage_tracking`, {
+        method: "POST",
+        headers: {
+          apikey: supabaseKey,
+          Authorization: `Bearer ${supabaseKey}`,
+          "Content-Type": "application/json",
+          Prefer: "return=minimal"
+        },
+        body: JSON.stringify({ user_id: userId, date: today, count: 1 })
+      });
+    }
+
+    // Return response with usage info
+    return res.status(200).json({
+      ...data,
+      usage_info: {
+        count: currentCount + 1,
+        limit: DAILY_LIMIT,
+        remaining: DAILY_LIMIT - (currentCount + 1)
+      }
+    });
+
+  } catch (err) {
+    return res.status(500).json({ error: "Server error", details: err.message });
   }
 }
