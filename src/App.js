@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { supabase } from "./supabaseClient";
-import Auth, { VerifyEmail, ResetPassword } from "./Auth";
+import Auth, { VerifyEmail } from "./Auth";
 import Profile, { AvatarButton } from "./Profile";
 
 const style = `
@@ -588,7 +588,6 @@ export default function App() {
   const [session, setSession] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [verifyEmail, setVerifyEmail] = useState(null);
-  const [resetMode, setResetMode] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [pantryLoading, setPantryLoading] = useState(true);
   const [pantryStatus, setPantryStatus] = useState("saved");
@@ -608,16 +607,6 @@ export default function App() {
       if (session) loadPantry(session.user.id);
     });
     return () => subscription.unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash;
-      if (hash.includes("type=recovery")) setResetMode(true);
-    };
-    handleHashChange();
-    window.addEventListener("hashchange", handleHashChange);
-    return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
 
   const loadPantry = async (userId) => {
