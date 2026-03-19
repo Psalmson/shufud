@@ -405,7 +405,7 @@ Only include the slots: ${slots.join(", ")}. Keep meal names short (2-5 words). 
       {error && <div className="planner-error-box">⚠ {error}</div>}
 
       <button className="planner-ai-btn" onClick={fillWithAI} disabled={aiLoading}>
-        {aiLoading ? <><div className="planner-spinner" /> Generating your week…</> : "✦ AI Fill My Week"}
+        {aiLoading ? <><div className="planner-spinner" /> Generating meal plan…</> : "✦ Generate Meal Plan"}
       </button>
 
       <div className="planner-grid">
