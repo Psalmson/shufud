@@ -26,7 +26,7 @@ const style = `
     --card-shadow: 0 4px 24px rgba(46,83,57,0.10);
   }
 
-  body { font-family: 'Afacad Flux', sans-serif; background: var(--bg); color: var(--charcoal); min-height: 100vh; }
+  body { font-family: 'Afacad Flux', sans-serif; font-size: 18px; background: var(--bg); color: var(--charcoal); min-height: 100vh; }
   .app { max-width: 900px; margin: 0 auto; padding: 0 24px 80px; }
 
   .header { text-align: center; padding: 48px 0 32px; position: relative; }
