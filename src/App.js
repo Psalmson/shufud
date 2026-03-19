@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { supabase } from "./supabaseClient";
 import Auth, { VerifyEmail } from "./Auth";
 import Profile, { AvatarButton } from "./Profile";
+import Auth, { VerifyEmail, ResetPassword } from "./Auth";
 
 const style = `
   @import url('https://fonts.googleapis.com/css2?family=Afacad+Flux:wght@100..1000&family=Spectral:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap');
@@ -584,6 +585,7 @@ export default function App() {
   const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
   const [pantry, setPantry] = useState({
     proteins: [], vegetables: [], grains: [], spices: [], oils: [], others: []
+  const [resetMode, setResetMode] = useState(false);
   });
   const [session, setSession] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -601,6 +603,17 @@ export default function App() {
       setAuthLoading(false);
       if (session) loadPantry(session.user.id);
     });
+    useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+      if (hash.includes("type=recovery")) {
+        setResetMode(true);
+      }
+    };
+    handleHashChange();
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       sessionRef.current = session;
@@ -677,6 +690,12 @@ export default function App() {
 
   if (verifyEmail) return <VerifyEmail email={verifyEmail} onBack={() => setVerifyEmail(null)} />;
   if (!session) return <Auth onVerify={(email) => setVerifyEmail(email)} />;
+if (resetMode) return (
+    <ResetPassword onDone={() => {
+      setResetMode(false);
+      window.location.hash = "";
+    }} />
+  );
 
   return (
     <>
