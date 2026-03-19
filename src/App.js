@@ -130,7 +130,7 @@ const style = `
   .pantry-top-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
   .pantry-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--green); }
   .pantry-title span { font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--muted); margin-left: 10px; }
-  .pantry-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .pantry-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
   .pantry-add-row { display: flex; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
   .category-select { padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--bg); font-family: 'DM Mono', monospace; font-size: 0.78rem; color: var(--charcoal); outline: none; cursor: pointer; min-width: 170px; transition: border-color 0.2s; }
   .category-select:focus { border-color: var(--teal); }
@@ -424,7 +424,7 @@ function RecipeTab({ pantryIngredients }) {
   );
 }
 
-function PantryTab({ pantry, setPantry, categories, setCategories, onSave, saving, dirty, saveMsg, loading }) {
+function PantryTab({ pantry, setPantry, categories, setCategories, pantryStatus, loading }) {
   const [input, setInput] = useState("");
   const [selectedCat, setSelectedCat] = useState("proteins");
   const [editingCat, setEditingCat] = useState(null);
@@ -486,25 +486,18 @@ function PantryTab({ pantry, setPantry, categories, setCategories, onSave, savin
     <>
       {showAddModal && <AddCategoryModal onClose={() => setShowAddModal(false)} onAdd={handleAddCategory} />}
 
-      {saveMsg && (
-        <div style={{
-          background: saveMsg.includes("failed") ? "#fff3ee" : "#edfaff",
-          border: `1.5px solid ${saveMsg.includes("failed") ? "#ffcfb8" : "#b8eaf5"}`,
-          borderRadius: "10px", padding: "10px 16px", marginBottom: "16px",
-          fontSize: "0.78rem", color: saveMsg.includes("failed") ? "#FF570A" : "#037a97"
-        }}>
-          {saveMsg.includes("failed") ? "⚠ " : "✓ "}{saveMsg}
-        </div>
-      )}
-
       <div className="pantry-top-row">
         <div className="pantry-title">My Pantry <span>{totalItems} item{totalItems !== 1 ? "s" : ""}</span></div>
         <div className="pantry-actions">
           <button className="btn btn-secondary btn-icon" onClick={() => setShowAddModal(true)}>+ New Category</button>
           {totalItems > 0 && <button className="btn btn-danger btn-icon" onClick={clearAll}>Clear All</button>}
-          <button className="btn btn-green btn-icon" onClick={onSave} disabled={saving || !dirty}>
-            {saving ? <><div className="spinner" />Saving…</> : dirty ? "💾 Save Pantry" : "✓ Saved"}
-          </button>
+          <span style={{
+            fontSize: "0.7rem",
+            color: pantryStatus === "saving" ? "var(--teal)" : pantryStatus === "error" ? "var(--orange)" : "var(--muted)",
+            display: "flex", alignItems: "center", gap: "5px"
+          }}>
+            {pantryStatus === "saving" ? "⟳ Saving…" : pantryStatus === "error" ? "⚠ Save failed" : "✓ Saved"}
+          </span>
         </div>
       </div>
 
@@ -597,37 +590,24 @@ export default function App() {
   const [verifyEmail, setVerifyEmail] = useState(null);
   const [showProfile, setShowProfile] = useState(false);
   const [pantryLoading, setPantryLoading] = useState(true);
-  const [pantryDirty, setPantryDirty] = useState(false);
-  const [pantrySaving, setPantrySaving] = useState(false);
-  const [pantrySaveMsg, setPantrySaveMsg] = useState("");
-
-  const handleSetPantry = (updater) => { setPantry(updater); setPantryDirty(true); };
-  const handleSetCategories = (updater) => { setCategories(updater); setPantryDirty(true); };
-  const totalPantryItems = Object.values(pantry).flat().length;
+  const [pantryStatus, setPantryStatus] = useState("saved");
+  const pantryTimerRef = useRef(null);
+  const sessionRef = useRef(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      sessionRef.current = session;
       setAuthLoading(false);
       if (session) loadPantry(session.user.id);
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      sessionRef.current = session;
       if (session) loadPantry(session.user.id);
     });
     return () => subscription.unsubscribe();
   }, []);
-
-  useEffect(() => {
-    const handleBeforeUnload = (e) => {
-      if (pantryDirty) {
-        e.preventDefault();
-        e.returnValue = "";
-      }
-    };
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [pantryDirty]);
 
   const loadPantry = async (userId) => {
     setPantryLoading(true);
@@ -641,33 +621,53 @@ export default function App() {
       console.log("No pantry found, using defaults");
     } finally {
       setPantryLoading(false);
-      setPantryDirty(false);
+      setPantryStatus("saved");
     }
   };
 
-  const savePantry = async () => {
-    if (!session) return;
-    setPantrySaving(true); setPantrySaveMsg("");
+  const savePantry = async (currentPantry, currentCategories) => {
+    const currentSession = sessionRef.current;
+    if (!currentSession) return;
+    setPantryStatus("saving");
     try {
       const { error } = await supabase.from("pantry").upsert({
-        user_id: session.user.id,
-        categories,
-        items: pantry,
+        user_id: currentSession.user.id,
+        categories: currentCategories,
+        items: currentPantry,
         updated_at: new Date().toISOString()
       }, { onConflict: "user_id" });
       if (error) throw error;
-      setPantryDirty(false);
-      setPantrySaveMsg("Pantry saved!");
-      setTimeout(() => setPantrySaveMsg(""), 3000);
+      setPantryStatus("saved");
     } catch (err) {
-      setPantrySaveMsg("Save failed. Try again.");
-    } finally { setPantrySaving(false); }
+      setPantryStatus("error");
+    }
   };
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    setSession(null);
+  const schedulePantrySave = (newPantry, newCategories) => {
+    setPantryStatus("unsaved");
+    if (pantryTimerRef.current) clearTimeout(pantryTimerRef.current);
+    pantryTimerRef.current = setTimeout(() => {
+      savePantry(newPantry, newCategories);
+    }, 2000);
   };
+
+  const handleSetPantry = (updater) => {
+    setPantry(prev => {
+      const next = typeof updater === "function" ? updater(prev) : updater;
+      schedulePantrySave(next, categories);
+      return next;
+    });
+  };
+
+  const handleSetCategories = (updater) => {
+    setCategories(prev => {
+      const next = typeof updater === "function" ? updater(prev) : updater;
+      schedulePantrySave(pantry, next);
+      return next;
+    });
+  };
+
+  const totalPantryItems = Object.values(pantry).flat().length;
 
   if (authLoading) return (
     <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f8faf8", fontFamily: "DM Mono, monospace", color: "#4a6655", fontSize: "0.85rem" }}>
@@ -702,14 +702,7 @@ export default function App() {
         </header>
 
         <div className="tabs">
-          <button className={`tab ${activeTab === "recipes" ? "active" : ""}`} onClick={() => {
-            if (activeTab === "pantry" && pantryDirty) {
-              const leave = window.confirm("You have unsaved pantry changes. Leave without saving?");
-              if (!leave) return;
-              setPantryDirty(false);
-            }
-            setActiveTab("recipes");
-          }}>🍽 Recipes</button>
+          <button className={`tab ${activeTab === "recipes" ? "active" : ""}`} onClick={() => setActiveTab("recipes")}>🍽 Recipes</button>
           <button className={`tab ${activeTab === "pantry" ? "active" : ""}`} onClick={() => setActiveTab("pantry")}>
             🧺 My Pantry {totalPantryItems > 0 && <span className="tab-badge">{totalPantryItems}</span>}
           </button>
@@ -722,10 +715,7 @@ export default function App() {
               setPantry={handleSetPantry}
               categories={categories}
               setCategories={handleSetCategories}
-              onSave={savePantry}
-              saving={pantrySaving}
-              dirty={pantryDirty}
-              saveMsg={pantrySaveMsg}
+              pantryStatus={pantryStatus}
               loading={pantryLoading}
             />
         }
