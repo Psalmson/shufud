@@ -675,10 +675,6 @@ export default function App() {
     </div>
   );
 
-  if (resetMode) return (
-    <ResetPassword onDone={() => { setResetMode(false); window.location.hash = ""; }} />
-  );
-
   if (verifyEmail) return <VerifyEmail email={verifyEmail} onBack={() => setVerifyEmail(null)} />;
   if (!session) return <Auth onVerify={(email) => setVerifyEmail(email)} />;
 
