@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { supabase } from "./supabaseClient";
 
 const ALLOWED_DOMAINS = ["gmail.com", "yahoo.com", "yahoo.co.uk"];
@@ -157,9 +157,7 @@ function ForgotPassword({ onBack }) {
           ) : (
             <>
               <div className="auth-title">Set new password</div>
-              <p className="auth-sub">
-                Setting new password for <strong>{email}</strong>.
-              </p>
+              <p className="auth-sub">Setting new password for <strong>{email}</strong>.</p>
               {error && <div className="auth-error">⚠ {error}</div>}
               <div className="auth-field">
                 <label className="auth-label">New Password</label>
@@ -177,154 +175,6 @@ function ForgotPassword({ onBack }) {
                 {loading ? <><div className="spinner" />Updating…</> : "Update Password"}
               </button>
               <button className="auth-btn secondary" onClick={() => { setStep(1); setError(""); }}>← Change Email</button>
-            </>
-          )}
-        </div>
-      </div>
-    </>
-  );
-}
-
-  const handleSend = async () => {
-    setError("");
-    if (!email) { setError("Please enter your email address."); return; }
-    if (!isAllowedEmail(email)) { setError("Only Gmail and Yahoo email addresses are allowed."); return; }
-    setLoading(true);
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin
-      });
-      if (error) throw error;
-      setSent(true);
-    } catch (err) {
-      setError(err.message);
-    } finally { setLoading(false); }
-  };
-
-  return (
-    <>
-      <style>{style}</style>
-      <div className="auth-page">
-        <div className="auth-box">
-          <div className="auth-header">
-            <div className="auth-logo"><em>Shufud</em></div>
-            <div className="auth-accent">
-              <span style={{ background: "#2E5339" }} />
-              <span style={{ background: "#FF570A" }} />
-              <span style={{ background: "#05B2DC" }} />
-            </div>
-          </div>
-
-          {sent ? (
-            <div style={{ textAlign: "center" }}>
-              <div className="verify-icon">📩</div>
-              <div className="auth-title">Check your inbox!</div>
-              <p className="auth-sub" style={{ marginBottom: "24px" }}>
-                We sent a password reset link to <strong>{email}</strong>.<br />
-                Click the link to set a new password.
-              </p>
-              <div className="auth-success">✓ Reset email sent successfully</div>
-              <p style={{ fontSize: "0.82rem", color: "var(--muted)", marginBottom: "20px", lineHeight: 1.6 }}>
-                Didn't get it? Check your spam folder. The link expires in 1 hour.
-              </p>
-              <button className="auth-btn secondary" onClick={onBack}>← Back to Sign In</button>
-            </div>
-          ) : (
-            <>
-              <div className="auth-title">Reset your password</div>
-              <p className="auth-sub">Enter your email and we'll send you a reset link.</p>
-              {error && <div className="auth-error">⚠ {error}</div>}
-              <div className="auth-field">
-                <label className="auth-label">Email Address</label>
-                <input className="auth-input" type="email"
-                  placeholder="you@gmail.com or you@yahoo.com"
-                  value={email} onChange={e => setEmail(e.target.value)}
-                  onKeyDown={e => e.key === "Enter" && handleSend()} />
-              </div>
-              <button className="auth-btn" onClick={handleSend} disabled={loading}>
-                {loading ? <><div className="spinner" />Sending…</> : "Send Reset Link"}
-              </button>
-              <button className="auth-btn secondary" onClick={onBack}>← Back to Sign In</button>
-            </>
-          )}
-        </div>
-      </div>
-    </>
-  );
-}
-
-export function ResetPassword({ onDone }) {
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [sessionReady, setSessionReady] = useState(false);
-
-  useEffect(() => {
-    // Listen for the PASSWORD_RECOVERY event from Supabase
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "PASSWORD_RECOVERY" && session) {
-        setSessionReady(true);
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const handleReset = async () => {
-    setError("");
-    if (!password) { setError("Please enter a new password."); return; }
-    if (password.length < 8) { setError("Password must be at least 8 characters."); return; }
-    if (password !== confirmPassword) { setError("Passwords do not match."); return; }
-    setLoading(true);
-    try {
-      const { error } = await supabase.auth.updateUser({ password });
-      if (error) throw error;
-      onDone();
-    } catch (err) {
-      setError(err.message);
-    } finally { setLoading(false); }
-  };
-
-  return (
-    <>
-      <style>{style}</style>
-      <div className="auth-page">
-        <div className="auth-box">
-          <div className="auth-header">
-            <div className="auth-logo"><em>Shufud</em></div>
-            <div className="auth-accent">
-              <span style={{ background: "#2E5339" }} />
-              <span style={{ background: "#FF570A" }} />
-              <span style={{ background: "#05B2DC" }} />
-            </div>
-          </div>
-
-          {!sessionReady ? (
-            <div style={{ textAlign: "center", padding: "20px 0" }}>
-              <div style={{ fontSize: "2rem", marginBottom: "12px" }}>⏳</div>
-              <div className="auth-title">Verifying your link…</div>
-              <p className="auth-sub">Please wait while we verify your reset link.</p>
-            </div>
-          ) : (
-            <>
-              <div className="auth-title">Set new password</div>
-              <p className="auth-sub">Choose a strong password for your account.</p>
-              {error && <div className="auth-error">⚠ {error}</div>}
-              <div className="auth-field">
-                <label className="auth-label">New Password</label>
-                <PasswordInput placeholder="Min. 8 characters"
-                  value={password} onChange={e => setPassword(e.target.value)} />
-                <p className="password-hint">At least 8 characters</p>
-              </div>
-              <div className="auth-field">
-                <label className="auth-label">Confirm New Password</label>
-                <PasswordInput placeholder="Repeat new password"
-                  value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
-                  onKeyDown={e => e.key === "Enter" && handleReset()} />
-              </div>
-              <button className="auth-btn" onClick={handleReset} disabled={loading}>
-                {loading ? <><div className="spinner" />Updating password…</> : "Set New Password & Sign In"}
-              </button>
             </>
           )}
         </div>
