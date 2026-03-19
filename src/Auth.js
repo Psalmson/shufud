@@ -382,15 +382,3 @@ export default function Auth({ onVerify }) {
     </>
   );
 }
-```
-
----
-
-Also go to **Supabase → Authentication → URL Configuration** and make sure **Site URL** is:
-```
-https://shufud.vercel.app
-```
-
-And **Redirect URLs** includes:
-```
-https://shufud.vercel.app
