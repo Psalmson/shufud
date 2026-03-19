@@ -1,4 +1,3 @@
-// src/Auth.js  ← NEW FILE
 import { useState } from "react";
 import { supabase } from "./supabaseClient";
 
@@ -10,174 +9,74 @@ const isAllowedEmail = (email) => {
 };
 
 const style = `
-  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400;500&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Afacad+Flux:wght@100..1000&family=Spectral:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --green: #2E5339;
-    --green-light: #3a6647;
-    --green-pale: #f0f5f1;
-    --orange: #FF570A;
-    --orange-light: #ff7033;
-    --orange-pale: #fff3ee;
-    --teal: #05B2DC;
-    --teal-light: #29c4e8;
-    --teal-pale: #edfaff;
-    --bg: #f8faf8;
-    --warm-white: #ffffff;
-    --charcoal: #0f1f14;
-    --muted: #4a6655;
-    --border: #d4e2d8;
-    --card-shadow: 0 4px 24px rgba(46,83,57,0.10);
+    --green: #2E5339; --green-light: #3a6647; --green-pale: #f0f5f1;
+    --orange: #FF570A; --orange-light: #ff7033; --orange-pale: #fff3ee;
+    --teal: #05B2DC; --teal-light: #29c4e8; --teal-pale: #edfaff;
+    --bg: #f8faf8; --warm-white: #ffffff; --charcoal: #0f1f14;
+    --muted: #4a6655; --border: #d4e2d8; --card-shadow: 0 4px 24px rgba(46,83,57,0.10);
   }
-  body { font-family: 'DM Mono', monospace; background: var(--bg); color: var(--charcoal); min-height: 100vh; }
+  body { font-family: 'Afacad Flux', sans-serif; background: var(--bg); color: var(--charcoal); min-height: 100vh; }
 
-  .auth-page {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-    background: var(--bg);
-  }
-
-  .auth-box {
-    background: var(--warm-white);
-    border: 1.5px solid var(--border);
-    border-radius: 24px;
-    padding: 40px;
-    width: 100%;
-    max-width: 420px;
-    box-shadow: var(--card-shadow);
-  }
-
+  .auth-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; background: var(--bg); }
+  .auth-box { background: var(--warm-white); border: 1.5px solid var(--border); border-radius: 24px; padding: 40px; width: 100%; max-width: 420px; box-shadow: var(--card-shadow); }
   .auth-header { text-align: center; margin-bottom: 32px; }
-
-  .auth-logo {
-    font-family: 'Playfair Display', serif;
-    font-size: 2.8rem;
-    color: var(--green);
-    line-height: 1;
-    letter-spacing: -1px;
-  }
+  .auth-logo { font-family: 'Spectral', serif; font-size: 2.8rem; color: var(--green); line-height: 1; letter-spacing: -1px; }
   .auth-logo em { color: var(--orange); font-style: italic; }
-
-  .auth-accent {
-    display: flex;
-    justify-content: center;
-    gap: 0;
-    margin: 12px auto 0;
-    border-radius: 4px;
-    overflow: hidden;
-    width: 80px;
-    height: 4px;
-  }
+  .auth-accent { display: flex; justify-content: center; margin: 12px auto 0; border-radius: 4px; overflow: hidden; width: 80px; height: 4px; }
   .auth-accent span { display: block; height: 4px; flex: 1; }
-
-  .auth-tagline { margin-top: 10px; color: var(--muted); font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; }
-
-  .auth-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--charcoal); margin-bottom: 6px; }
-  .auth-sub { font-size: 0.75rem; color: var(--muted); margin-bottom: 24px; line-height: 1.5; }
-
+  .auth-tagline { margin-top: 10px; color: var(--muted); font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; }
+  .auth-title { font-family: 'Spectral', serif; font-size: 1.4rem; color: var(--charcoal); margin-bottom: 6px; }
+  .auth-sub { font-size: 0.82rem; color: var(--muted); margin-bottom: 24px; line-height: 1.5; }
   .auth-field { margin-bottom: 16px; }
-  .auth-label { font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 8px; font-weight: 500; }
-
-  .auth-input {
-    width: 100%;
-    padding: 12px 16px;
-    border: 1.5px solid var(--border);
-    border-radius: 10px;
-    background: var(--bg);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.85rem;
-    color: var(--charcoal);
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
+  .auth-label { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 8px; font-weight: 600; }
+  .auth-input { width: 100%; padding: 12px 16px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--bg); font-family: 'Afacad Flux', sans-serif; font-size: 0.95rem; color: var(--charcoal); outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
   .auth-input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(5,178,220,0.12); }
   .auth-input::placeholder { color: #9ab5a2; }
   .auth-input.error { border-color: var(--orange); }
-
-  .auth-btn {
-    width: 100%;
-    padding: 14px;
-    background: var(--orange);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-family: 'Playfair Display', serif;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    margin-top: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    letter-spacing: 0.02em;
-  }
+  .password-wrapper { position: relative; }
+  .password-wrapper .auth-input { padding-right: 44px; }
+  .password-toggle { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--muted); font-size: 1rem; padding: 4px; line-height: 1; transition: color 0.15s; }
+  .password-toggle:hover { color: var(--teal); }
+  .auth-btn { width: 100%; padding: 14px; background: var(--orange); color: white; border: none; border-radius: 12px; font-family: 'Spectral', serif; font-size: 1rem; cursor: pointer; transition: all 0.2s; margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; letter-spacing: 0.02em; }
   .auth-btn:hover:not(:disabled) { background: var(--orange-light); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(255,87,10,0.35); }
   .auth-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-
-  .auth-btn.secondary {
-    background: transparent;
-    color: var(--green);
-    border: 1.5px solid var(--border);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.82rem;
-    margin-top: 12px;
-  }
+  .auth-btn.secondary { background: transparent; color: var(--green); border: 1.5px solid var(--border); font-family: 'Afacad Flux', sans-serif; font-size: 0.88rem; margin-top: 12px; }
   .auth-btn.secondary:hover { border-color: var(--green); background: var(--green-pale); box-shadow: none; transform: none; }
-
-  .auth-error {
-    background: var(--orange-pale);
-    border: 1.5px solid #ffcfb8;
-    border-radius: 10px;
-    padding: 12px 16px;
-    color: var(--orange);
-    font-size: 0.78rem;
-    margin-bottom: 16px;
-    line-height: 1.5;
-  }
-
-  .auth-success {
-    background: var(--teal-pale);
-    border: 1.5px solid #b8eaf5;
-    border-radius: 10px;
-    padding: 12px 16px;
-    color: #037a97;
-    font-size: 0.78rem;
-    margin-bottom: 16px;
-    line-height: 1.5;
-  }
-
-  .auth-divider {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 20px 0;
-    color: var(--muted);
-    font-size: 0.72rem;
-  }
-  .auth-divider::before, .auth-divider::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
-
-  .auth-switch { text-align: center; margin-top: 20px; font-size: 0.75rem; color: var(--muted); }
-  .auth-switch button { background: none; border: none; color: var(--orange); cursor: pointer; font-family: 'DM Mono', monospace; font-size: 0.75rem; font-weight: 500; text-decoration: underline; }
+  .auth-error { background: var(--orange-pale); border: 1.5px solid #ffcfb8; border-radius: 10px; padding: 12px 16px; color: var(--orange); font-size: 0.82rem; margin-bottom: 16px; line-height: 1.5; }
+  .auth-success { background: var(--teal-pale); border: 1.5px solid #b8eaf5; border-radius: 10px; padding: 12px 16px; color: #037a97; font-size: 0.82rem; margin-bottom: 16px; line-height: 1.5; }
+  .auth-divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; color: var(--muted); font-size: 0.76rem; }
+  .auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .auth-switch { text-align: center; margin-top: 20px; font-size: 0.82rem; color: var(--muted); }
+  .auth-switch button { background: none; border: none; color: var(--orange); cursor: pointer; font-family: 'Afacad Flux', sans-serif; font-size: 0.82rem; font-weight: 600; text-decoration: underline; }
   .auth-switch button:hover { color: var(--orange-light); }
-
   .verify-icon { font-size: 3rem; margin-bottom: 16px; }
-
-  .password-hint { font-size: 0.68rem; color: var(--muted); margin-top: 6px; }
-
+  .password-hint { font-size: 0.72rem; color: var(--muted); margin-top: 6px; }
   .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 `;
 
-// ── VERIFY EMAIL SCREEN ──────────────────────────────────────────────────────
+function PasswordInput({ placeholder, value, onChange, onKeyDown, className }) {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="password-wrapper">
+      <input
+        className={`auth-input ${className || ""}`}
+        type={show ? "text" : "password"}
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+        onKeyDown={onKeyDown}
+      />
+      <button type="button" className="password-toggle" onClick={() => setShow(s => !s)} tabIndex={-1}>
+        {show ? "🙈" : "👁"}
+      </button>
+    </div>
+  );
+}
+
 export function VerifyEmail({ email, onBack }) {
   return (
     <>
@@ -199,10 +98,8 @@ export function VerifyEmail({ email, onBack }) {
               We sent a verification link to <strong>{email}</strong>.<br />
               Click the link to activate your Shufud account.
             </p>
-            <div className="auth-success">
-              ✓ Verification email sent successfully via Shufud
-            </div>
-            <p style={{ fontSize: "0.72rem", color: "var(--muted)", marginBottom: "20px", lineHeight: 1.6 }}>
+            <div className="auth-success">✓ Verification email sent successfully via Shufud</div>
+            <p style={{ fontSize: "0.78rem", color: "var(--muted)", marginBottom: "20px", lineHeight: 1.6 }}>
               Didn't get it? Check your spam folder. The link expires in 24 hours.
             </p>
             <button className="auth-btn secondary" onClick={onBack}>← Back to Sign In</button>
@@ -213,7 +110,6 @@ export function VerifyEmail({ email, onBack }) {
   );
 }
 
-// ── AUTH SCREEN (Login + Signup) ─────────────────────────────────────────────
 export default function Auth({ onVerify }) {
   const [mode, setMode] = useState("login");
   const [email, setEmail] = useState("");
@@ -239,11 +135,7 @@ export default function Auth({ onVerify }) {
     setLoading(true);
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { emailRedirectTo: window.location.origin }
-        });
+        const { error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin } });
         if (error) throw error;
         onVerify(email);
       } else {
@@ -251,18 +143,11 @@ export default function Auth({ onVerify }) {
         if (error) throw error;
       }
     } catch (err) {
-      if (err.message.includes("Email not confirmed")) {
-        setError("Please verify your email before signing in. Check your inbox.");
-      } else if (err.message.includes("Invalid login credentials")) {
-        setError("Incorrect email or password. Please try again.");
-      } else if (err.message.includes("User already registered")) {
-        setError("An account with this email already exists. Please sign in.");
-      } else {
-        setError(err.message);
-      }
-    } finally {
-      setLoading(false);
-    }
+      if (err.message.includes("Email not confirmed")) setError("Please verify your email before signing in. Check your inbox.");
+      else if (err.message.includes("Invalid login credentials")) setError("Incorrect email or password. Please try again.");
+      else if (err.message.includes("User already registered")) setError("An account with this email already exists. Please sign in.");
+      else setError(err.message);
+    } finally { setLoading(false); }
   };
 
   const handleKeyDown = (e) => { if (e.key === "Enter") handleSubmit(); };
@@ -284,9 +169,7 @@ export default function Auth({ onVerify }) {
 
           <div className="auth-title">{mode === "login" ? "Welcome back" : "Create your account"}</div>
           <p className="auth-sub">
-            {mode === "login"
-              ? "Sign in to access your recipes and pantry."
-              : "Join Shufud — Gmail and Yahoo addresses only."}
+            {mode === "login" ? "Sign in to access your recipes and pantry." : "Join Shufud — Gmail and Yahoo addresses only."}
           </p>
 
           {error && <div className="auth-error">⚠ {error}</div>}
@@ -300,7 +183,7 @@ export default function Auth({ onVerify }) {
 
           <div className="auth-field">
             <label className="auth-label">Password</label>
-            <input className="auth-input" type="password"
+            <PasswordInput
               placeholder={mode === "signup" ? "Min. 8 characters" : "Your password"}
               value={password} onChange={e => setPassword(e.target.value)} onKeyDown={handleKeyDown} />
             {mode === "signup" && <p className="password-hint">At least 8 characters</p>}
@@ -309,24 +192,23 @@ export default function Auth({ onVerify }) {
           {mode === "signup" && (
             <div className="auth-field">
               <label className="auth-label">Confirm Password</label>
-              <input className="auth-input" type="password" placeholder="Repeat your password"
+              <PasswordInput
+                placeholder="Repeat your password"
                 value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} onKeyDown={handleKeyDown} />
             </div>
           )}
 
           <button className="auth-btn" onClick={handleSubmit} disabled={loading}>
-            {loading ? <><div className="spinner" />{mode === "login" ? "Signing in…" : "Creating account…"}</> 
-              : mode === "login" ? "Sign In" : "Create Account"}
+            {loading ? <><div className="spinner" />{mode === "login" ? "Signing in…" : "Creating account…"}</> : mode === "login" ? "Sign In" : "Create Account"}
           </button>
 
           <div className="auth-divider">or</div>
 
           <div className="auth-switch">
-            {mode === "login" ? (
-              <span>Don't have an account? <button onClick={() => { setMode("signup"); setError(""); }}>Sign up</button></span>
-            ) : (
-              <span>Already have an account? <button onClick={() => { setMode("login"); setError(""); }}>Sign in</button></span>
-            )}
+            {mode === "login"
+              ? <span>Don't have an account? <button onClick={() => { setMode("signup"); setError(""); }}>Sign up</button></span>
+              : <span>Already have an account? <button onClick={() => { setMode("login"); setError(""); }}>Sign in</button></span>
+            }
           </div>
         </div>
       </div>
