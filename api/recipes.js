@@ -50,10 +50,19 @@ export default async function handler(req, res) {
     }
   }
 
+  // ── Get user tier ─────────────────────────────────────────────────────────
+  const profileRes = await fetch(
+    `${supabaseUrl}/rest/v1/profiles?id=eq.${userData.id}&select=tier`,
+    { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
+  );
+  const profileData = await profileRes.json();
+  const tier = profileData?.[0]?.tier || "free";
+  const TIER_LIMITS = { free: 2, commis: 5, sous: 10, head: 999 };
+  const DAILY_LIMIT = TIER_LIMITS[tier] || 2;
+
   // ── Daily limit check ─────────────────────────────────────────────────────
   const userId = userData.id;
   const today = new Date().toISOString().split("T")[0];
-  const DAILY_LIMIT = 2;
 
   const usageRes = await fetch(
     `${supabaseUrl}/rest/v1/usage_tracking?user_id=eq.${userId}&date=eq.${today}`,
@@ -73,7 +82,7 @@ export default async function handler(req, res) {
   if (currentCount >= DAILY_LIMIT) {
     return res.status(429).json({
       error: "daily_limit_reached",
-      message: `You've used your ${DAILY_LIMIT} free recipe suggestions for today. Come back tomorrow!`,
+      message: `You've used your ${DAILY_LIMIT} recipe suggestions for today. Come back tomorrow!`,
       count: currentCount,
       limit: DAILY_LIMIT
     });
@@ -94,7 +103,6 @@ export default async function handler(req, res) {
     const data = await response.json();
     if (!response.ok) return res.status(response.status).json({ error: "Claude API error", details: data });
 
-    // Update usage count
     if (currentUsage) {
       await fetch(
         `${supabaseUrl}/rest/v1/usage_tracking?user_id=eq.${userId}&date=eq.${today}`,
