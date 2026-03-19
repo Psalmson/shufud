@@ -29,7 +29,7 @@ const style = `
   body { font-family: 'DM Mono', monospace; background: var(--bg); color: var(--charcoal); min-height: 100vh; }
   .app { max-width: 900px; margin: 0 auto; padding: 0 24px 80px; }
 
-  .header { text-align: center; padding: 48px 0 32px; }
+  .header { text-align: center; padding: 48px 0 32px; position: relative; }
   .header-accent { display: flex; justify-content: center; gap: 0; margin-bottom: 24px; border-radius: 4px; overflow: hidden; width: 120px; margin-left: auto; margin-right: auto; height: 5px; }
   .header-accent span { display: block; height: 5px; }
   .header h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.8rem, 6vw, 4rem); color: var(--green); line-height: 1; letter-spacing: -1px; }
@@ -567,6 +567,7 @@ function PantryTab({ pantry, setPantry, categories, setCategories }) {
 }
 
 export default function App() {
+  const [showProfile, setShowProfile] = useState(false);
   const [activeTab, setActiveTab] = useState("recipes");
   const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
   const [pantry, setPantry] = useState({
@@ -606,24 +607,24 @@ export default function App() {
     <>
       <style>{style}</style>
       <div className="app">
-        <header className="header">
-          <div className="header-accent">
-            <span style={{ background: "#2E5339", flex: 1 }} />
-            <span style={{ background: "#FF570A", flex: 1 }} />
-            <span style={{ background: "#05B2DC", flex: 1 }} />
-          </div>
-          <h1><em>Shufud</em></h1>
-          <p className="header-sub">Tell me what you have · I'll tell you what to cook</p>
-          <div className="cuisine-tags">
-            {[["🍛 Jollof Rice","ct-1"],["🥘 Egusi Soup","ct-2"],["🌶 Pepper Soup","ct-3"],["🍌 Dodo","ct-4"],["🫕 Efo Riro","ct-5"]].map(([tag,cls]) => (
-              <span key={tag} className={`cuisine-tag ${cls}`}>{tag}</span>
-            ))}
-          </div>
-          <p className="nigerian-badge">✦ Nigerian &amp; African cuisine featured</p>
-          <button onClick={handleSignOut} style={{ marginTop: "12px", background: "transparent", border: "1.5px solid var(--border)", borderRadius: "8px", padding: "6px 14px", fontFamily: "DM Mono, monospace", fontSize: "0.7rem", color: "var(--muted)", cursor: "pointer", letterSpacing: "0.06em" }}>
-            Sign Out
-          </button>
-        </header>
+<header className="header">
+  <div style={{ position: "absolute", top: "20px", right: "24px" }}>
+    <AvatarButton session={session} onClick={() => setShowProfile(true)} />
+  </div>
+  <div className="header-accent">
+    <span style={{ background: "#2E5339", flex: 1 }} />
+    <span style={{ background: "#FF570A", flex: 1 }} />
+    <span style={{ background: "#05B2DC", flex: 1 }} />
+  </div>
+  <h1><em>Shufud</em></h1>
+  <p className="header-sub">Tell me what you have · I'll tell you what to cook</p>
+  <div className="cuisine-tags">
+    {[["🍛 Jollof Rice","ct-1"],["🥘 Egusi Soup","ct-2"],["🌶 Pepper Soup","ct-3"],["🍌 Dodo","ct-4"],["🫕 Efo Riro","ct-5"]].map(([tag,cls]) => (
+      <span key={tag} className={`cuisine-tag ${cls}`}>{tag}</span>
+    ))}
+  </div>
+  <p className="nigerian-badge">✦ Nigerian &amp; African cuisine featured</p>
+</header>
         <div className="tabs">
           <button className={`tab ${activeTab === "recipes" ? "active" : ""}`} onClick={() => setActiveTab("recipes")}>🍽 Recipes</button>
           <button className={`tab ${activeTab === "pantry" ? "active" : ""}`} onClick={() => setActiveTab("pantry")}>
@@ -634,6 +635,17 @@ export default function App() {
           ? <RecipeTab pantryIngredients={pantry} />
           : <PantryTab pantry={pantry} setPantry={setPantry} categories={categories} setCategories={setCategories} />
         }
+          {showProfile && (
+          <Profile
+            session={session}
+            onClose={() => setShowProfile(false)}
+            onSignOut={async () => { await supabase.auth.signOut(); setSession(null); setShowProfile(false); }}
+          />
+        )}
+      </div>
+    </>
+  );
+}
       </div>
     </>
   );
