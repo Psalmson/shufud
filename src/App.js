@@ -716,10 +716,9 @@ useEffect(() => {
             session={session}
             onClose={() => setShowProfile(false)}
             onSignOut={async () => { await supabase.auth.signOut(); setSession(null); setShowProfile(false); }}
-          />
+/>
         )}
       </div>
-   </>}
     </>
   );
 }
