@@ -1,3 +1,6 @@
+import { useState } from "react";
+import PaymentModal from "./PaymentModal";
+
 const TIERS = [
   {
     key: "commis",
@@ -60,7 +63,7 @@ const upgradeStyle = `
   .upgrade-dismiss:hover { background: rgba(255,255,255,0.25); }
   .upgrade-body { padding: 24px 28px 32px; }
   .upgrade-tiers { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
-  .upgrade-tier { border: 2px solid var(--border); border-radius: 16px; padding: 20px 16px; text-align: center; transition: all 0.2s; position: relative; }
+  .upgrade-tier { border: 2px solid var(--border); border-radius: 16px; padding: 20px 16px; text-align: center; transition: all 0.2s; position: relative; cursor: pointer; }
   .upgrade-tier:hover { box-shadow: 0 6px 24px rgba(46,83,57,0.12); transform: translateY(-2px); }
   .upgrade-tier-badge { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: var(--orange); color: white; font-size: 0.62rem; padding: 3px 12px; border-radius: 20px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; }
   .upgrade-tier-name { font-family: 'Spectral', serif; font-size: 1rem; color: var(--charcoal); margin-bottom: 4px; font-weight: 600; }
@@ -69,20 +72,26 @@ const upgradeStyle = `
   .upgrade-tier-features { list-style: none; text-align: left; margin-bottom: 16px; }
   .upgrade-tier-features li { font-size: 0.8rem; color: var(--muted); padding: 3px 0; display: flex; align-items: flex-start; gap: 6px; line-height: 1.4; }
   .upgrade-tier-features li::before { content: '✓'; color: var(--green); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
-  .upgrade-contact { text-align: center; background: var(--green-pale); border: 1.5px solid var(--border); border-radius: 12px; padding: 16px 20px; }
-  .upgrade-contact p { font-size: 0.88rem; color: var(--muted); margin-bottom: 8px; line-height: 1.5; }
-  .upgrade-contact strong { color: var(--green); }
-  .upgrade-contact a { color: var(--orange); font-weight: 600; text-decoration: none; }
-  .upgrade-contact a:hover { text-decoration: underline; }
+  .upgrade-tier-btn { width: 100%; padding: 10px; border: none; border-radius: 10px; color: white; font-family: 'Spectral', serif; font-size: 0.92rem; cursor: pointer; transition: all 0.2s; opacity: 0.9; }
+  .upgrade-tier-btn:hover { opacity: 1; transform: translateY(-1px); }
   .upgrade-trial-info { text-align: center; margin-bottom: 20px; }
   .upgrade-trial-info p { font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
   .upgrade-trial-info strong { color: var(--orange); }
 `;
 
-export default function UpgradeModal({ onDismiss, trialExpired, daysLeft }) {
+export default function UpgradeModal({ onDismiss, trialExpired, daysLeft, userEmail }) {
+  const [paymentTier, setPaymentTier] = useState(null);
+
   return (
     <>
       <style>{upgradeStyle}</style>
+      {paymentTier && (
+        <PaymentModal
+          onClose={() => setPaymentTier(null)}
+          userEmail={userEmail}
+          initialTier={paymentTier}
+        />
+      )}
       <div className="upgrade-overlay">
         <div className="upgrade-modal">
           <div className="upgrade-header">
@@ -104,7 +113,9 @@ export default function UpgradeModal({ onDismiss, trialExpired, daysLeft }) {
             )}
             <div className="upgrade-tiers">
               {TIERS.map(tier => (
-                <div className="upgrade-tier" key={tier.key} style={{ borderColor: tier.color + "40" }}>
+                <div className="upgrade-tier" key={tier.key}
+                  style={{ borderColor: tier.color + "40" }}
+                  onClick={() => setPaymentTier(tier.key)}>
                   {tier.badge && <div className="upgrade-tier-badge">{tier.badge}</div>}
                   <div className="upgrade-tier-name">{tier.name}</div>
                   <div className="upgrade-tier-price" style={{ color: tier.color }}>{tier.price}</div>
@@ -112,15 +123,11 @@ export default function UpgradeModal({ onDismiss, trialExpired, daysLeft }) {
                   <ul className="upgrade-tier-features">
                     {tier.features.map(f => <li key={f}>{f}</li>)}
                   </ul>
+                  <button className="upgrade-tier-btn" style={{ background: tier.color }}>
+                    Get Started →
+                  </button>
                 </div>
               ))}
-            </div>
-            <div className="upgrade-contact">
-              <p>To upgrade, send a message to <strong>Shufud Support</strong> with your registered email and chosen plan.</p>
-              <p style={{ marginTop: "8px" }}>
-                📧 <a href="mailto:support@thord.co">support@thord.co</a> &nbsp;|&nbsp;
-                💬 <a href="https://wa.me/2348000000000" target="_blank" rel="noreferrer">WhatsApp Us</a>
-              </p>
             </div>
           </div>
         </div>
