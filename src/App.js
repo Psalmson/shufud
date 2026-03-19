@@ -611,18 +611,18 @@ export default function App() {
       setAuthLoading(false);
       if (session) loadPantry(session.user.id);
     });
-    useEffect(() => {
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [pantryDirty]);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+          useEffect(() => {
     const handleBeforeUnload = (e) => {
       if (pantryDirty) {
         e.preventDefault();
         e.returnValue = "";
       }
     };
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [pantryDirty]);
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
       if (session) loadPantry(session.user.id);
     });
     return () => subscription.unsubscribe();
