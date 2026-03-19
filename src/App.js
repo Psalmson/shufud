@@ -62,6 +62,8 @@ const style = `
   .btn-primary:hover:not(:disabled) { background: var(--orange-light); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(255,87,10,0.35); }
   .btn-secondary { background: var(--teal); color: white; }
   .btn-secondary:hover { background: var(--teal-light); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(5,178,220,0.35); }
+  .btn-green { background: var(--green); color: white; }
+  .btn-green:hover:not(:disabled) { background: var(--green-light); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(46,83,57,0.3); }
   .btn-ghost { background: transparent; border: 1.5px solid var(--border); color: var(--muted); }
   .btn-ghost:hover { border-color: var(--teal); color: var(--teal); }
   .btn-danger { background: transparent; border: 1.5px solid var(--border); color: var(--muted); }
@@ -282,13 +284,9 @@ function RecipeTab({ pantryIngredients }) {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token;
-
       const res = await fetch("/api/recipes", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify({
           model: "claude-sonnet-4-6",
           max_tokens: 1200,
@@ -296,17 +294,13 @@ function RecipeTab({ pantryIngredients }) {
           messages: [{ role: "user", content: `Ingredients: ${ings.join(", ")}. Meal: ${mealType}. Diet: ${dietary}. Suggest 2 recipes.` }]
         })
       });
-
       const data = await res.json();
-
       if (res.status === 429) { setError(data.message); return; }
       if (!res.ok) { setError(`API Error: ${JSON.stringify(data?.details || data?.error)}`); return; }
-
       const text = data.content?.map(b => b.text || "").join("") || "";
       const parsed = JSON.parse(text.replace(/```json|```/g, "").trim());
       setRecipes(parsed.recipes || []);
       if (parsed.recipes?.length) setExpanded({ 0: true });
-
       if (data.usage_info?.remaining === 0) {
         setError("That was your last recipe suggestion for today. Come back tomorrow!");
       }
@@ -481,28 +475,39 @@ function PantryTab({ pantry, setPantry, categories, setCategories, onSave, savin
     setSelectedCat(newCat.key);
   };
 
+  if (loading) return (
+    <div style={{ textAlign: "center", padding: "60px 24px", color: "var(--muted)", fontSize: "0.82rem" }}>
+      <div style={{ fontSize: "2.5rem", marginBottom: "14px" }}>🧺</div>
+      Loading your pantry…
+    </div>
+  );
+
   return (
     <>
       {showAddModal && <AddCategoryModal onClose={() => setShowAddModal(false)} onAdd={handleAddCategory} />}
+
       {saveMsg && (
-        <div style={{ background: saveMsg.includes("failed") ? "#fff3ee" : "#edfaff", border: `1.5px solid ${saveMsg.includes("failed") ? "#ffcfb8" : "#b8eaf5"}`, borderRadius: "10px", padding: "10px 16px", marginBottom: "16px", fontSize: "0.78rem", color: saveMsg.includes("failed") ? "#FF570A" : "#037a97" }}>
+        <div style={{
+          background: saveMsg.includes("failed") ? "#fff3ee" : "#edfaff",
+          border: `1.5px solid ${saveMsg.includes("failed") ? "#ffcfb8" : "#b8eaf5"}`,
+          borderRadius: "10px", padding: "10px 16px", marginBottom: "16px",
+          fontSize: "0.78rem", color: saveMsg.includes("failed") ? "#FF570A" : "#037a97"
+        }}>
           {saveMsg.includes("failed") ? "⚠ " : "✓ "}{saveMsg}
         </div>
       )}
-      {loading && (
-        <div style={{ textAlign: "center", padding: "40px", color: "var(--muted)", fontSize: "0.82rem" }}>
-          <div style={{ fontSize: "2rem", marginBottom: "12px" }}>🧺</div>
-          Loading your pantry…
-        </div>
-      )}
-      {!loading && <>
-      <div className="pantry-actions">
+
+      <div className="pantry-top-row">
+        <div className="pantry-title">My Pantry <span>{totalItems} item{totalItems !== 1 ? "s" : ""}</span></div>
+        <div className="pantry-actions">
           <button className="btn btn-secondary btn-icon" onClick={() => setShowAddModal(true)}>+ New Category</button>
           {totalItems > 0 && <button className="btn btn-danger btn-icon" onClick={clearAll}>Clear All</button>}
           <button className="btn btn-green btn-icon" onClick={onSave} disabled={saving || !dirty}>
             {saving ? <><div className="spinner" />Saving…</> : dirty ? "💾 Save Pantry" : "✓ Saved"}
           </button>
         </div>
+      </div>
+
       <div className="card">
         <span className="input-label">Add Ingredient to Pantry</span>
         <div className="pantry-add-row">
@@ -516,6 +521,7 @@ function PantryTab({ pantry, setPantry, categories, setCategories, onSave, savin
         </div>
         <p style={{ fontSize: "0.7rem", color: "var(--muted)", marginTop: "4px" }}>Press Enter or comma to add quickly.</p>
       </div>
+
       <div className="pantry-categories">
         {categories.map(cat => {
           const items = pantry[cat.key] || [];
@@ -558,6 +564,7 @@ function PantryTab({ pantry, setPantry, categories, setCategories, onSave, savin
           );
         })}
       </div>
+
       {totalItems > 0 && (
         <div className="pantry-cook-section">
           <h3>🍳 Ready to Cook?</h3>
@@ -568,39 +575,37 @@ function PantryTab({ pantry, setPantry, categories, setCategories, onSave, savin
           </div>
         </div>
       )}
+
       {totalItems === 0 && (
         <div className="empty-state">
           <div className="empty-icon">🧺</div>
           <p>Your pantry is empty.<br />Start adding what you have at home!</p>
         </div>
       )}
-      </>}
     </>
   );
 }
 
 export default function App() {
-  const [showProfile, setShowProfile] = useState(false);
-const [pantryLoading, setPantryLoading] = useState(true);
-const [pantryDirty, setPantryDirty] = useState(false);
-const [pantrySaving, setPantrySaving] = useState(false);
-const [pantrySaveMsg, setPantrySaveMsg] = useState("");
+  const [activeTab, setActiveTab] = useState("recipes");
+  const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
+  const [pantry, setPantry] = useState({
+    proteins: [], vegetables: [], grains: [], spices: [], oils: [], others: []
+  });
   const [session, setSession] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [verifyEmail, setVerifyEmail] = useState(null);
- const totalPantryItems = Object.values(pantry).flat().length;
+  const [showProfile, setShowProfile] = useState(false);
+  const [pantryLoading, setPantryLoading] = useState(true);
+  const [pantryDirty, setPantryDirty] = useState(false);
+  const [pantrySaving, setPantrySaving] = useState(false);
+  const [pantrySaveMsg, setPantrySaveMsg] = useState("");
 
-  const handleSetPantry = (updater) => {
-    setPantry(updater);
-    setPantryDirty(true);
-  };
+  const handleSetPantry = (updater) => { setPantry(updater); setPantryDirty(true); };
+  const handleSetCategories = (updater) => { setCategories(updater); setPantryDirty(true); };
+  const totalPantryItems = Object.values(pantry).flat().length;
 
-  const handleSetCategories = (updater) => {
-    setCategories(updater);
-    setPantryDirty(true);
-  };
-
-useEffect(() => {
+  useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setAuthLoading(false);
@@ -645,10 +650,8 @@ useEffect(() => {
       setTimeout(() => setPantrySaveMsg(""), 3000);
     } catch (err) {
       setPantrySaveMsg("Save failed. Try again.");
-    } finally {
-      setPantrySaving(false);
-    }
-  };;
+    } finally { setPantrySaving(false); }
+  };
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -668,24 +671,25 @@ useEffect(() => {
     <>
       <style>{style}</style>
       <div className="app">
-<header className="header">
-  <div style={{ position: "absolute", top: "20px", right: "24px" }}>
-    <AvatarButton session={session} onClick={() => setShowProfile(true)} />
-  </div>
-  <div className="header-accent">
-    <span style={{ background: "#2E5339", flex: 1 }} />
-    <span style={{ background: "#FF570A", flex: 1 }} />
-    <span style={{ background: "#05B2DC", flex: 1 }} />
-  </div>
-  <h1><em>Shufud</em></h1>
-  <p className="header-sub">Tell me what you have · I'll tell you what to cook</p>
-  <div className="cuisine-tags">
-    {[["🍛 Jollof Rice","ct-1"],["🥘 Egusi Soup","ct-2"],["🌶 Pepper Soup","ct-3"],["🍌 Dodo","ct-4"],["🫕 Efo Riro","ct-5"]].map(([tag,cls]) => (
-      <span key={tag} className={`cuisine-tag ${cls}`}>{tag}</span>
-    ))}
-  </div>
-  <p className="nigerian-badge">✦ Nigerian &amp; African cuisine featured</p>
-</header>
+        <header className="header">
+          <div style={{ position: "absolute", top: "20px", right: "24px" }}>
+            <AvatarButton session={session} onClick={() => setShowProfile(true)} />
+          </div>
+          <div className="header-accent">
+            <span style={{ background: "#2E5339", flex: 1 }} />
+            <span style={{ background: "#FF570A", flex: 1 }} />
+            <span style={{ background: "#05B2DC", flex: 1 }} />
+          </div>
+          <h1><em>Shufud</em></h1>
+          <p className="header-sub">Tell me what you have · I'll tell you what to cook</p>
+          <div className="cuisine-tags">
+            {[["🍛 Jollof Rice","ct-1"],["🥘 Egusi Soup","ct-2"],["🌶 Pepper Soup","ct-3"],["🍌 Dodo","ct-4"],["🫕 Efo Riro","ct-5"]].map(([tag,cls]) => (
+              <span key={tag} className={`cuisine-tag ${cls}`}>{tag}</span>
+            ))}
+          </div>
+          <p className="nigerian-badge">✦ Nigerian &amp; African cuisine featured</p>
+        </header>
+
         <div className="tabs">
           <button className={`tab ${activeTab === "recipes" ? "active" : ""}`} onClick={() => {
             if (activeTab === "pantry" && pantryDirty) {
@@ -697,6 +701,7 @@ useEffect(() => {
             🧺 My Pantry {totalPantryItems > 0 && <span className="tab-badge">{totalPantryItems}</span>}
           </button>
         </div>
+
         {activeTab === "recipes"
           ? <RecipeTab pantryIngredients={pantry} />
           : <PantryTab
@@ -711,12 +716,13 @@ useEffect(() => {
               loading={pantryLoading}
             />
         }
-          {showProfile && (
+
+        {showProfile && (
           <Profile
             session={session}
             onClose={() => setShowProfile(false)}
             onSignOut={async () => { await supabase.auth.signOut(); setSession(null); setShowProfile(false); }}
-/>
+          />
         )}
       </div>
     </>
