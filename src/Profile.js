@@ -21,115 +21,60 @@ const getAvatarColor = (email) => {
   return colors[index];
 };
 
+function PasswordInput({ placeholder, value, onChange, className }) {
+  const [show, setShow] = useState(false);
+  return (
+    <div style={{ position: "relative" }}>
+      <input
+        className={`profile-input ${className || ""}`}
+        type={show ? "text" : "password"}
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+        style={{ paddingRight: "44px" }}
+      />
+      <button type="button" onClick={() => setShow(s => !s)} tabIndex={-1} style={{
+        position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)",
+        background: "none", border: "none", cursor: "pointer", color: "#4a6655",
+        fontSize: "1rem", padding: "4px", lineHeight: 1, transition: "color 0.15s"
+      }}>
+        {show ? "🙈" : "👁"}
+      </button>
+    </div>
+  );
+}
+
 const drawerStyle = `
-  .profile-overlay {
-    position: fixed; inset: 0; background: rgba(15,31,20,0.5);
-    z-index: 200; animation: fadeIn 0.2s ease;
-  }
+  @import url('https://fonts.googleapis.com/css2?family=Afacad+Flux:wght@100..1000&family=Spectral:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap');
+
+  .profile-overlay { position: fixed; inset: 0; background: rgba(15,31,20,0.5); z-index: 200; animation: fadeIn 0.2s ease; }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-  .profile-drawer {
-    position: fixed; top: 0; right: 0; height: 100vh;
-    width: 100%; max-width: 420px;
-    background: #f8faf8; z-index: 201;
-    overflow-y: auto; animation: slideIn 0.25s ease;
-    box-shadow: -8px 0 40px rgba(15,31,20,0.15);
-    display: flex; flex-direction: column;
-  }
+  .profile-drawer { position: fixed; top: 0; right: 0; height: 100vh; width: 100%; max-width: 420px; background: #f8faf8; z-index: 201; overflow-y: auto; animation: slideIn 0.25s ease; box-shadow: -8px 0 40px rgba(15,31,20,0.15); display: flex; flex-direction: column; }
   @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
-
-  .profile-header {
-    background: #2E5339; padding: 28px 24px 24px;
-    display: flex; align-items: center; gap: 16px;
-    position: relative;
-  }
-  .profile-close {
-    position: absolute; top: 16px; right: 16px;
-    background: rgba(255,255,255,0.15); border: none; color: white;
-    width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
-    font-size: 1rem; display: flex; align-items: center; justify-content: center;
-    transition: background 0.2s;
-  }
+  .profile-header { background: #2E5339; padding: 28px 24px 24px; display: flex; align-items: center; gap: 16px; position: relative; }
+  .profile-close { position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.15); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
   .profile-close:hover { background: rgba(255,255,255,0.25); }
-
-  .profile-avatar-large {
-    width: 64px; height: 64px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Playfair Display', serif; font-size: 1.4rem;
-    color: white; font-weight: 700; flex-shrink: 0;
-    border: 3px solid rgba(255,255,255,0.3);
-  }
+  .profile-avatar-large { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Spectral', serif; font-size: 1.4rem; color: white; font-weight: 700; flex-shrink: 0; border: 3px solid rgba(255,255,255,0.3); }
   .profile-header-info { flex: 1; min-width: 0; }
-  .profile-header-name {
-    font-family: 'Playfair Display', serif; color: white;
-    font-size: 1.2rem; margin-bottom: 4px;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  .profile-header-email {
-    color: rgba(255,255,255,0.7); font-size: 0.72rem;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  .profile-tier-badge {
-    display: inline-block; margin-top: 8px;
-    background: #FF570A; color: white;
-    font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
-    padding: 3px 10px; border-radius: 20px; font-weight: 600;
-  }
-
+  .profile-header-name { font-family: 'Spectral', serif; color: white; font-size: 1.2rem; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .profile-header-email { color: rgba(255,255,255,0.7); font-size: 0.78rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .profile-tier-badge { display: inline-block; margin-top: 8px; background: #FF570A; color: white; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; font-weight: 600; }
   .profile-body { padding: 20px 24px; flex: 1; }
-
-  .profile-stats {
-    display: grid; grid-template-columns: 1fr 1fr 1fr;
-    gap: 10px; margin-bottom: 24px;
-  }
-  .stat-card {
-    background: white; border: 1.5px solid #d4e2d8;
-    border-radius: 14px; padding: 14px 10px; text-align: center;
-    box-shadow: 0 2px 8px rgba(46,83,57,0.06);
-  }
-  .stat-value {
-    font-family: 'Playfair Display', serif; font-size: 1.5rem;
-    color: #2E5339; line-height: 1;
-  }
-  .stat-label { font-size: 0.62rem; color: #4a6655; margin-top: 4px; letter-spacing: 0.06em; text-transform: uppercase; }
-
+  .profile-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 24px; }
+  .stat-card { background: white; border: 1.5px solid #d4e2d8; border-radius: 14px; padding: 14px 10px; text-align: center; box-shadow: 0 2px 8px rgba(46,83,57,0.06); }
+  .stat-value { font-family: 'Spectral', serif; font-size: 1.5rem; color: #2E5339; line-height: 1; }
+  .stat-label { font-size: 0.65rem; color: #4a6655; margin-top: 4px; letter-spacing: 0.06em; text-transform: uppercase; }
   .profile-section { margin-bottom: 20px; }
-  .profile-section-title {
-    font-size: 0.65rem; letter-spacing: 0.14em; text-transform: uppercase;
-    color: #4a6655; margin-bottom: 12px; font-weight: 600;
-    display: flex; align-items: center; gap: 8px;
-  }
+  .profile-section-title { font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: #4a6655; margin-bottom: 12px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
   .profile-section-title::after { content: ''; flex: 1; height: 1px; background: #d4e2d8; }
-
   .profile-field { margin-bottom: 14px; }
-  .profile-label {
-    font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase;
-    color: #4a6655; display: block; margin-bottom: 7px; font-weight: 500;
-  }
-  .profile-input {
-    width: 100%; padding: 11px 14px;
-    border: 1.5px solid #d4e2d8; border-radius: 10px;
-    background: white; font-family: 'DM Mono', monospace;
-    font-size: 0.83rem; color: #0f1f14; outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
+  .profile-label { font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: #4a6655; display: block; margin-bottom: 7px; font-weight: 600; }
+  .profile-input { width: 100%; padding: 11px 14px; border: 1.5px solid #d4e2d8; border-radius: 10px; background: white; font-family: 'Afacad Flux', sans-serif; font-size: 0.95rem; color: #0f1f14; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
   .profile-input:focus { border-color: #05B2DC; box-shadow: 0 0 0 3px rgba(5,178,220,0.12); }
   .profile-input:disabled { background: #f0f5f1; color: #4a6655; cursor: not-allowed; }
-  .profile-select {
-    width: 100%; padding: 11px 14px;
-    border: 1.5px solid #d4e2d8; border-radius: 10px;
-    background: white; font-family: 'DM Mono', monospace;
-    font-size: 0.83rem; color: #0f1f14; outline: none; cursor: pointer;
-    transition: border-color 0.2s;
-  }
+  .profile-select { width: 100%; padding: 11px 14px; border: 1.5px solid #d4e2d8; border-radius: 10px; background: white; font-family: 'Afacad Flux', sans-serif; font-size: 0.95rem; color: #0f1f14; outline: none; cursor: pointer; transition: border-color 0.2s; }
   .profile-select:focus { border-color: #05B2DC; }
-
-  .profile-btn {
-    width: 100%; padding: 13px; border: none; border-radius: 10px;
-    font-family: 'DM Mono', monospace; font-size: 0.82rem;
-    cursor: pointer; transition: all 0.2s; font-weight: 500;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-  }
+  .profile-btn { width: 100%; padding: 13px; border: none; border-radius: 10px; font-family: 'Afacad Flux', sans-serif; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; }
   .profile-btn-primary { background: #FF570A; color: white; margin-bottom: 10px; }
   .profile-btn-primary:hover:not(:disabled) { background: #ff7033; transform: translateY(-1px); }
   .profile-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -137,24 +82,9 @@ const drawerStyle = `
   .profile-btn-ghost:hover { border-color: #2E5339; color: #2E5339; }
   .profile-btn-danger { background: transparent; border: 1.5px solid #d4e2d8; color: #4a6655; }
   .profile-btn-danger:hover { border-color: #FF570A; color: #FF570A; background: #fff3ee; }
-
-  .profile-success {
-    background: #edfaff; border: 1.5px solid #b8eaf5;
-    border-radius: 10px; padding: 10px 14px;
-    color: #037a97; font-size: 0.75rem; margin-bottom: 14px;
-  }
-  .profile-error {
-    background: #fff3ee; border: 1.5px solid #ffcfb8;
-    border-radius: 10px; padding: 10px 14px;
-    color: #FF570A; font-size: 0.75rem; margin-bottom: 14px;
-  }
-
-  .profile-spinner {
-    width: 16px; height: 16px;
-    border: 2px solid rgba(255,255,255,0.4);
-    border-top-color: white; border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
+  .profile-success { background: #edfaff; border: 1.5px solid #b8eaf5; border-radius: 10px; padding: 10px 14px; color: #037a97; font-size: 0.82rem; margin-bottom: 14px; }
+  .profile-error { background: #fff3ee; border: 1.5px solid #ffcfb8; border-radius: 10px; padding: 10px 14px; color: #FF570A; font-size: 0.82rem; margin-bottom: 14px; }
+  .profile-spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 `;
 
@@ -172,12 +102,11 @@ export function AvatarButton({ session, onClick }) {
 
   return (
     <button onClick={onClick} style={{
-      width: "38px", height: "38px", borderRadius: "50%",
-      background: color, border: "2px solid rgba(255,255,255,0.3)",
-      display: "flex", alignItems: "center", justifyContent: "center",
-      cursor: "pointer", color: "white", fontFamily: "'Playfair Display', serif",
-      fontSize: "0.85rem", fontWeight: "700", flexShrink: 0,
-      transition: "transform 0.2s, box-shadow 0.2s",
+      width: "38px", height: "38px", borderRadius: "50%", background: color,
+      border: "2px solid rgba(255,255,255,0.3)", display: "flex", alignItems: "center",
+      justifyContent: "center", cursor: "pointer", color: "white",
+      fontFamily: "'Spectral', serif", fontSize: "0.85rem", fontWeight: "700",
+      flexShrink: 0, transition: "transform 0.2s, box-shadow 0.2s",
     }}
     onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.08)"; e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.2)"; }}
     onMouseLeave={e => { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.boxShadow = "none"; }}>
@@ -202,18 +131,11 @@ export default function Profile({ session, onClose, onSignOut }) {
   const today = new Date().toISOString().split("T")[0];
   const memberSince = new Date(session?.user?.created_at).toLocaleDateString("en-GB", { month: "long", year: "numeric" });
 
-  useEffect(() => {
-    loadProfile();
-    loadUsage();
-  }, []);
+  useEffect(() => { loadProfile(); loadUsage(); }, []);
 
   const loadProfile = async () => {
     const { data } = await supabase.from("profiles").select("*").eq("id", session.user.id).single();
-    if (data) {
-      setProfile(data);
-      setDisplayName(data.display_name || "");
-      setDietary(data.dietary_preference || "none");
-    }
+    if (data) { setProfile(data); setDisplayName(data.display_name || ""); setDietary(data.dietary_preference || "none"); }
   };
 
   const loadUsage = async () => {
@@ -224,17 +146,12 @@ export default function Profile({ session, onClose, onSignOut }) {
   const saveProfile = async () => {
     setSaving(true); setError(""); setSuccess("");
     try {
-      const { error } = await supabase.from("profiles").upsert({
-        id: session.user.id,
-        display_name: displayName.trim() || null,
-        dietary_preference: dietary,
-      });
+      const { error } = await supabase.from("profiles").upsert({ id: session.user.id, display_name: displayName.trim() || null, dietary_preference: dietary });
       if (error) throw error;
       setSuccess("Profile saved successfully!");
       setTimeout(() => setSuccess(""), 3000);
-    } catch (err) {
-      setError(err.message);
-    } finally { setSaving(false); }
+    } catch (err) { setError(err.message); }
+    finally { setSaving(false); }
   };
 
   const changePassword = async () => {
@@ -249,23 +166,18 @@ export default function Profile({ session, onClose, onSignOut }) {
       setNewPassword(""); setConfirmPassword("");
       setSuccess("Password changed successfully!");
       setTimeout(() => setSuccess(""), 3000);
-    } catch (err) {
-      setError(err.message);
-    } finally { setChangingPassword(false); }
+    } catch (err) { setError(err.message); }
+    finally { setChangingPassword(false); }
   };
 
   const deleteAccount = async () => {
-    const confirmed = window.confirm("Are you sure you want to delete your account? This cannot be undone.");
-    if (!confirmed) return;
-    const reconfirmed = window.confirm("Last chance — all your data will be permanently deleted. Continue?");
-    if (!reconfirmed) return;
+    if (!window.confirm("Are you sure you want to delete your account? This cannot be undone.")) return;
+    if (!window.confirm("Last chance — all your data will be permanently deleted. Continue?")) return;
     try {
       await supabase.from("profiles").delete().eq("id", session.user.id);
       await supabase.auth.signOut();
       onSignOut();
-    } catch (err) {
-      setError("Could not delete account. Please contact support.");
-    }
+    } catch (err) { setError("Could not delete account. Please contact support."); }
   };
 
   const initials = getInitials(displayName || profile?.display_name, session?.user?.email);
@@ -290,7 +202,6 @@ export default function Profile({ session, onClose, onSignOut }) {
           {success && <div className="profile-success">✓ {success}</div>}
           {error && <div className="profile-error">⚠ {error}</div>}
 
-          {/* Stats */}
           <div className="profile-stats">
             <div className="stat-card">
               <div className="stat-value">{usageToday}/{DAILY_LIMIT}</div>
@@ -306,13 +217,11 @@ export default function Profile({ session, onClose, onSignOut }) {
             </div>
           </div>
 
-          {/* Edit Profile */}
           <div className="profile-section">
             <div className="profile-section-title">Profile</div>
             <div className="profile-field">
               <label className="profile-label">Display Name</label>
-              <input className="profile-input" placeholder="e.g. Psalmson"
-                value={displayName} onChange={e => setDisplayName(e.target.value)} />
+              <input className="profile-input" placeholder="e.g. Psalmson" value={displayName} onChange={e => setDisplayName(e.target.value)} />
             </div>
             <div className="profile-field">
               <label className="profile-label">Email</label>
@@ -329,25 +238,21 @@ export default function Profile({ session, onClose, onSignOut }) {
             </button>
           </div>
 
-          {/* Change Password */}
           <div className="profile-section">
             <div className="profile-section-title">Security</div>
             <div className="profile-field">
               <label className="profile-label">New Password</label>
-              <input className="profile-input" type="password" placeholder="Min. 8 characters"
-                value={newPassword} onChange={e => setNewPassword(e.target.value)} />
+              <PasswordInput placeholder="Min. 8 characters" value={newPassword} onChange={e => setNewPassword(e.target.value)} />
             </div>
             <div className="profile-field">
               <label className="profile-label">Confirm New Password</label>
-              <input className="profile-input" type="password" placeholder="Repeat new password"
-                value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
+              <PasswordInput placeholder="Repeat new password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
             </div>
             <button className="profile-btn profile-btn-ghost" onClick={changePassword} disabled={changingPassword}>
               {changingPassword ? <><div className="profile-spinner" style={{ borderTopColor: "#2E5339" }} /> Updating…</> : "🔒 Change Password"}
             </button>
           </div>
 
-          {/* Account */}
           <div className="profile-section">
             <div className="profile-section-title">Account</div>
             <button className="profile-btn profile-btn-ghost" onClick={onSignOut}>Sign Out</button>
