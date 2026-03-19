@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { supabase } from "./supabaseClient";
 import Auth, { VerifyEmail } from "./Auth";
 import Profile, { AvatarButton } from "./Profile";
+import MealPlanner from "./MealPlanner";
 
 const style = `
   @import url('https://fonts.googleapis.com/css2?family=Afacad+Flux:wght@100..1000&family=Spectral:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap');
@@ -706,19 +707,23 @@ export default function App() {
           <button className={`tab ${activeTab === "pantry" ? "active" : ""}`} onClick={() => setActiveTab("pantry")}>
             🧺 My Pantry {totalPantryItems > 0 && <span className="tab-badge">{totalPantryItems}</span>}
           </button>
+          <button className={`tab ${activeTab === "planner" ? "active" : ""}`} onClick={() => setActiveTab("planner")}>🗓 Planner</button>
         </div>
 
-        {activeTab === "recipes"
-          ? <RecipeTab pantryIngredients={pantry} />
-          : <PantryTab
-              pantry={pantry}
-              setPantry={handleSetPantry}
-              categories={categories}
-              setCategories={handleSetCategories}
-              pantryStatus={pantryStatus}
-              loading={pantryLoading}
-            />
-        }
+        {activeTab === "recipes" && <RecipeTab pantryIngredients={pantry} />}
+        {activeTab === "pantry" && (
+          <PantryTab
+            pantry={pantry}
+            setPantry={handleSetPantry}
+            categories={categories}
+            setCategories={handleSetCategories}
+            pantryStatus={pantryStatus}
+            loading={pantryLoading}
+          />
+        )}
+        {activeTab === "planner" && (
+          <MealPlanner session={session} pantryIngredients={pantry} />
+        )}
 
         {showProfile && (
           <Profile
