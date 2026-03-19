@@ -18,7 +18,7 @@ const style = `
     --bg: #f8faf8; --warm-white: #ffffff; --charcoal: #0f1f14;
     --muted: #4a6655; --border: #d4e2d8; --card-shadow: 0 4px 24px rgba(46,83,57,0.10);
   }
-  body { font-family: 'Afacad Flux', sans-serif; background: var(--bg); color: var(--charcoal); min-height: 100vh; }
+  body { font-family: 'Afacad Flux', sans-serif; font-size: 18px; background: var(--bg); color: var(--charcoal); min-height: 100vh; }
 
   .auth-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; background: var(--bg); }
   .auth-box { background: var(--warm-white); border: 1.5px solid var(--border); border-radius: 24px; padding: 40px; width: 100%; max-width: 420px; box-shadow: var(--card-shadow); }
