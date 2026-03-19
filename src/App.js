@@ -805,6 +805,7 @@ export default function App() {
             onDismiss={() => setShowUpgrade(false)}
             trialExpired={trialExpired}
             daysLeft={trialDaysLeft}
+            userEmail={session?.user?.email}
           />
         )}
       </div>
