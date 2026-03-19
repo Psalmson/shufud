@@ -611,6 +611,16 @@ export default function App() {
       setAuthLoading(false);
       if (session) loadPantry(session.user.id);
     });
+    useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (pantryDirty) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [pantryDirty]);
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       if (session) loadPantry(session.user.id);
@@ -693,7 +703,9 @@ export default function App() {
         <div className="tabs">
           <button className={`tab ${activeTab === "recipes" ? "active" : ""}`} onClick={() => {
             if (activeTab === "pantry" && pantryDirty) {
-              if (!window.confirm("You have unsaved pantry changes. Leave without saving?")) return;
+              const leave = window.confirm("You have unsaved pantry changes. Leave without saving?");
+              if (!leave) return;
+              setPantryDirty(false);
             }
             setActiveTab("recipes");
           }}>🍽 Recipes</button>
