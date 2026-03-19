@@ -81,10 +81,109 @@ function PasswordInput({ placeholder, value, onChange, onKeyDown, className }) {
 }
 
 function ForgotPassword({ onBack }) {
+  const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+
+  const handleVerifyEmail = () => {
+    setError("");
+    if (!email) { setError("Please enter your email address."); return; }
+    if (!isAllowedEmail(email)) { setError("Only Gmail and Yahoo email addresses are allowed."); return; }
+    setStep(2);
+  };
+
+  const handleResetPassword = async () => {
+    setError("");
+    if (!password) { setError("Please enter a new password."); return; }
+    if (password.length < 8) { setError("Password must be at least 8 characters."); return; }
+    if (password !== confirmPassword) { setError("Passwords do not match."); return; }
+    setLoading(true);
+    try {
+      const res = await fetch("/api/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, newPassword: password })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to reset password");
+      setSuccess(true);
+    } catch (err) {
+      setError(err.message);
+    } finally { setLoading(false); }
+  };
+
+  return (
+    <>
+      <style>{style}</style>
+      <div className="auth-page">
+        <div className="auth-box">
+          <div className="auth-header">
+            <div className="auth-logo"><em>Shufud</em></div>
+            <div className="auth-accent">
+              <span style={{ background: "#2E5339" }} />
+              <span style={{ background: "#FF570A" }} />
+              <span style={{ background: "#05B2DC" }} />
+            </div>
+          </div>
+
+          {success ? (
+            <div style={{ textAlign: "center" }}>
+              <div className="verify-icon">✅</div>
+              <div className="auth-title">Password updated!</div>
+              <p className="auth-sub" style={{ marginBottom: "24px" }}>
+                Your password has been changed successfully. You can now sign in with your new password.
+              </p>
+              <button className="auth-btn" onClick={onBack}>Sign In</button>
+            </div>
+          ) : step === 1 ? (
+            <>
+              <div className="auth-title">Reset your password</div>
+              <p className="auth-sub">Enter your email address to continue.</p>
+              {error && <div className="auth-error">⚠ {error}</div>}
+              <div className="auth-field">
+                <label className="auth-label">Email Address</label>
+                <input className="auth-input" type="email"
+                  placeholder="you@gmail.com or you@yahoo.com"
+                  value={email} onChange={e => setEmail(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && handleVerifyEmail()} autoFocus />
+              </div>
+              <button className="auth-btn" onClick={handleVerifyEmail}>Continue</button>
+              <button className="auth-btn secondary" onClick={onBack}>← Back to Sign In</button>
+            </>
+          ) : (
+            <>
+              <div className="auth-title">Set new password</div>
+              <p className="auth-sub">
+                Setting new password for <strong>{email}</strong>.
+              </p>
+              {error && <div className="auth-error">⚠ {error}</div>}
+              <div className="auth-field">
+                <label className="auth-label">New Password</label>
+                <PasswordInput placeholder="Min. 8 characters"
+                  value={password} onChange={e => setPassword(e.target.value)} />
+                <p className="password-hint">At least 8 characters</p>
+              </div>
+              <div className="auth-field">
+                <label className="auth-label">Confirm New Password</label>
+                <PasswordInput placeholder="Repeat new password"
+                  value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && handleResetPassword()} />
+              </div>
+              <button className="auth-btn" onClick={handleResetPassword} disabled={loading}>
+                {loading ? <><div className="spinner" />Updating…</> : "Update Password"}
+              </button>
+              <button className="auth-btn secondary" onClick={() => { setStep(1); setError(""); }}>← Change Email</button>
+            </>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
 
   const handleSend = async () => {
     setError("");
