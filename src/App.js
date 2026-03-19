@@ -654,7 +654,7 @@ export default function App() {
         categories,
         items: pantry,
         updated_at: new Date().toISOString()
-      });
+      }, { onConflict: "user_id" });
       if (error) throw error;
       setPantryDirty(false);
       setPantrySaveMsg("Pantry saved!");
