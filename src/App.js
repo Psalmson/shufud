@@ -3,6 +3,10 @@ import { supabase } from "./supabaseClient";
 import Auth, { VerifyEmail } from "./Auth";
 import Profile, { AvatarButton } from "./Profile";
 import MealPlanner from "./MealPlanner";
+import Admin from "./Admin";
+import UpgradeModal from "./UpgradeModal";
+
+const ADMIN_EMAIL = "psalmsonlarinre@gmail.com";
 
 const style = `
   @import url('https://fonts.googleapis.com/css2?family=Afacad+Flux:wght@100..1000&family=Spectral:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap');
@@ -174,6 +178,13 @@ const style = `
   .emoji-opt.selected { border-color: var(--orange); background: var(--orange-pale); }
   .modal-actions { display: flex; gap: 10px; margin-top: 24px; }
   .modal-actions .btn { flex: 1; justify-content: center; }
+
+  .upgrade-lock { text-align: center; padding: 60px 24px; }
+  .upgrade-lock-icon { font-size: 3rem; margin-bottom: 16px; }
+  .upgrade-lock h3 { font-family: 'Spectral', serif; color: var(--green); font-size: 1.3rem; margin-bottom: 8px; }
+  .upgrade-lock p { font-size: 0.88rem; color: var(--muted); margin-bottom: 20px; line-height: 1.6; }
+  .upgrade-lock-btn { background: var(--orange); color: white; border: none; padding: 12px 28px; border-radius: 12px; font-family: 'Spectral', serif; font-size: 1rem; cursor: pointer; transition: all 0.2s; }
+  .upgrade-lock-btn:hover { background: var(--orange-light); transform: translateY(-1px); }
 `;
 
 const SWATCH_COLORS = ["#FF570A","#05B2DC","#2E5339","#3a6647","#ff7033","#29c4e8","#e04e00","#037a97","#1a3d25","#6aabbb"];
@@ -425,7 +436,7 @@ function RecipeTab({ pantryIngredients }) {
   );
 }
 
-function PantryTab({ pantry, setPantry, categories, setCategories, pantryStatus, loading }) {
+function PantryTab({ pantry, setPantry, categories, setCategories, pantryStatus, loading, userTier, onUpgrade }) {
   const [input, setInput] = useState("");
   const [selectedCat, setSelectedCat] = useState("proteins");
   const [editingCat, setEditingCat] = useState(null);
@@ -433,6 +444,15 @@ function PantryTab({ pantry, setPantry, categories, setCategories, pantryStatus,
   const [showAddModal, setShowAddModal] = useState(false);
   const inputRef = useRef(null);
   const totalItems = Object.values(pantry).flat().length;
+
+  if (userTier === "free") return (
+    <div className="upgrade-lock">
+      <div className="upgrade-lock-icon">🧺</div>
+      <h3>Pantry Sync is a paid feature</h3>
+      <p>Upgrade to Commis Chef or higher to sync your pantry across devices and sessions.</p>
+      <button className="upgrade-lock-btn" onClick={onUpgrade}>View Plans</button>
+    </div>
+  );
 
   const addItem = () => {
     const val = input.trim().toLowerCase();
@@ -486,7 +506,6 @@ function PantryTab({ pantry, setPantry, categories, setCategories, pantryStatus,
   return (
     <>
       {showAddModal && <AddCategoryModal onClose={() => setShowAddModal(false)} onAdd={handleAddCategory} />}
-
       <div className="pantry-top-row">
         <div className="pantry-title">My Pantry <span>{totalItems} item{totalItems !== 1 ? "s" : ""}</span></div>
         <div className="pantry-actions">
@@ -501,7 +520,6 @@ function PantryTab({ pantry, setPantry, categories, setCategories, pantryStatus,
           </span>
         </div>
       </div>
-
       <div className="card">
         <span className="input-label">Add Ingredient to Pantry</span>
         <div className="pantry-add-row">
@@ -515,7 +533,6 @@ function PantryTab({ pantry, setPantry, categories, setCategories, pantryStatus,
         </div>
         <p style={{ fontSize: "0.78rem", color: "var(--muted)", marginTop: "4px" }}>Press Enter or comma to add quickly.</p>
       </div>
-
       <div className="pantry-categories">
         {categories.map(cat => {
           const items = pantry[cat.key] || [];
@@ -558,7 +575,6 @@ function PantryTab({ pantry, setPantry, categories, setCategories, pantryStatus,
           );
         })}
       </div>
-
       {totalItems > 0 && (
         <div className="pantry-cook-section">
           <h3>🍳 Ready to Cook?</h3>
@@ -569,7 +585,6 @@ function PantryTab({ pantry, setPantry, categories, setCategories, pantryStatus,
           </div>
         </div>
       )}
-
       {totalItems === 0 && (
         <div className="empty-state">
           <div className="empty-icon">🧺</div>
@@ -590,6 +605,11 @@ export default function App() {
   const [authLoading, setAuthLoading] = useState(true);
   const [verifyEmail, setVerifyEmail] = useState(null);
   const [showProfile, setShowProfile] = useState(false);
+  const [showAdmin, setShowAdmin] = useState(false);
+  const [showUpgrade, setShowUpgrade] = useState(false);
+  const [userTier, setUserTier] = useState("free");
+  const [trialExpired, setTrialExpired] = useState(false);
+  const [trialDaysLeft, setTrialDaysLeft] = useState(7);
   const [pantryLoading, setPantryLoading] = useState(true);
   const [pantryStatus, setPantryStatus] = useState("saved");
   const pantryTimerRef = useRef(null);
@@ -600,19 +620,49 @@ export default function App() {
       setSession(session);
       sessionRef.current = session;
       setAuthLoading(false);
-      if (session) loadPantry(session.user.id);
+      if (session) {
+        loadPantry(session.user.id);
+        checkTrialAndTier(session);
+      }
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       sessionRef.current = session;
-      if (session) loadPantry(session.user.id);
+      if (session) {
+        loadPantry(session.user.id);
+        checkTrialAndTier(session);
+      }
     });
     return () => subscription.unsubscribe();
   }, []);
 
+  const checkTrialAndTier = async (session) => {
+    try {
+      const { data } = await supabase.from("profiles")
+        .select("tier, tier_expires_at")
+        .eq("id", session.user.id)
+        .single();
+      const tier = data?.tier || "free";
+      setUserTier(tier);
+      if (tier === "free") {
+        const created = new Date(session.user.created_at);
+        const daysUsed = Math.floor((Date.now() - created) / (1000 * 60 * 60 * 24));
+        const daysLeft = Math.max(0, 7 - daysUsed);
+        setTrialDaysLeft(daysLeft);
+        setTrialExpired(daysLeft === 0);
+        if (daysLeft <= 3) setShowUpgrade(true);
+      }
+    } catch (err) {
+      console.log("Could not check tier");
+    }
+  };
+
   const loadPantry = async (userId) => {
     setPantryLoading(true);
     try {
+      const { data: profileData } = await supabase.from("profiles").select("tier").eq("id", userId).single();
+      const tier = profileData?.tier || "free";
+      if (tier === "free") { setPantryLoading(false); setPantryStatus("saved"); return; }
       const { data } = await supabase.from("pantry").select("*").eq("user_id", userId).single();
       if (data) {
         setCategories(data.categories || DEFAULT_CATEGORIES);
@@ -647,9 +697,7 @@ export default function App() {
   const schedulePantrySave = (newPantry, newCategories) => {
     setPantryStatus("unsaved");
     if (pantryTimerRef.current) clearTimeout(pantryTimerRef.current);
-    pantryTimerRef.current = setTimeout(() => {
-      savePantry(newPantry, newCategories);
-    }, 2000);
+    pantryTimerRef.current = setTimeout(() => savePantry(newPantry, newCategories), 2000);
   };
 
   const handleSetPantry = (updater) => {
@@ -678,13 +726,21 @@ export default function App() {
 
   if (verifyEmail) return <VerifyEmail email={verifyEmail} onBack={() => setVerifyEmail(null)} />;
   if (!session) return <Auth onVerify={(email) => setVerifyEmail(email)} />;
+  if (showAdmin) return <Admin session={session} onBack={() => setShowAdmin(false)} />;
 
   return (
     <>
       <style>{style}</style>
       <div className="app">
         <header className="header">
-          <div style={{ position: "absolute", top: "20px", right: "24px" }}>
+          <div style={{ position: "absolute", top: "20px", right: "24px", display: "flex", gap: "8px", alignItems: "center" }}>
+            {session?.user?.email === ADMIN_EMAIL && (
+              <button onClick={() => setShowAdmin(true)} style={{
+                background: "var(--green)", border: "none", color: "white",
+                padding: "6px 12px", borderRadius: "8px", fontSize: "0.72rem",
+                cursor: "pointer", fontFamily: "Afacad Flux, sans-serif", fontWeight: 600
+              }}>⚙ Admin</button>
+            )}
             <AvatarButton session={session} onClick={() => setShowProfile(true)} />
           </div>
           <div className="header-accent">
@@ -705,7 +761,7 @@ export default function App() {
         <div className="tabs">
           <button className={`tab ${activeTab === "recipes" ? "active" : ""}`} onClick={() => setActiveTab("recipes")}>🍽 Recipes</button>
           <button className={`tab ${activeTab === "pantry" ? "active" : ""}`} onClick={() => setActiveTab("pantry")}>
-            🧺 My Pantry {totalPantryItems > 0 && <span className="tab-badge">{totalPantryItems}</span>}
+            🧺 My Pantry {totalPantryItems > 0 && userTier !== "free" && <span className="tab-badge">{totalPantryItems}</span>}
           </button>
           <button className={`tab ${activeTab === "planner" ? "active" : ""}`} onClick={() => setActiveTab("planner")}>🗓 Planner</button>
         </div>
@@ -719,10 +775,21 @@ export default function App() {
             setCategories={handleSetCategories}
             pantryStatus={pantryStatus}
             loading={pantryLoading}
+            userTier={userTier}
+            onUpgrade={() => setShowUpgrade(true)}
           />
         )}
         {activeTab === "planner" && (
-          <MealPlanner session={session} pantryIngredients={pantry} />
+          userTier === "free"
+            ? (
+              <div className="upgrade-lock">
+                <div className="upgrade-lock-icon">🗓</div>
+                <h3>Meal Planner is a paid feature</h3>
+                <p>Upgrade to Commis Chef or higher to access the AI-powered meal planner.</p>
+                <button className="upgrade-lock-btn" onClick={() => setShowUpgrade(true)}>View Plans</button>
+              </div>
+            )
+            : <MealPlanner session={session} pantryIngredients={pantry} />
         )}
 
         {showProfile && (
@@ -730,6 +797,14 @@ export default function App() {
             session={session}
             onClose={() => setShowProfile(false)}
             onSignOut={async () => { await supabase.auth.signOut(); setSession(null); setShowProfile(false); }}
+          />
+        )}
+
+        {showUpgrade && (
+          <UpgradeModal
+            onDismiss={() => setShowUpgrade(false)}
+            trialExpired={trialExpired}
+            daysLeft={trialDaysLeft}
           />
         )}
       </div>
