@@ -430,7 +430,7 @@ function RecipeTab({ pantryIngredients }) {
   );
 }
 
-function PantryTab({ pantry, setPantry, categories, setCategories }) {
+function PantryTab({ pantry, setPantry, categories, setCategories, onSave, saving, dirty, saveMsg, loading }) {
   const [input, setInput] = useState("");
   const [selectedCat, setSelectedCat] = useState("proteins");
   const [editingCat, setEditingCat] = useState(null);
@@ -484,13 +484,25 @@ function PantryTab({ pantry, setPantry, categories, setCategories }) {
   return (
     <>
       {showAddModal && <AddCategoryModal onClose={() => setShowAddModal(false)} onAdd={handleAddCategory} />}
-      <div className="pantry-top-row">
-        <div className="pantry-title">My Pantry <span>{totalItems} item{totalItems !== 1 ? "s" : ""}</span></div>
-        <div className="pantry-actions">
+      {saveMsg && (
+        <div style={{ background: saveMsg.includes("failed") ? "#fff3ee" : "#edfaff", border: `1.5px solid ${saveMsg.includes("failed") ? "#ffcfb8" : "#b8eaf5"}`, borderRadius: "10px", padding: "10px 16px", marginBottom: "16px", fontSize: "0.78rem", color: saveMsg.includes("failed") ? "#FF570A" : "#037a97" }}>
+          {saveMsg.includes("failed") ? "⚠ " : "✓ "}{saveMsg}
+        </div>
+      )}
+      {loading && (
+        <div style={{ textAlign: "center", padding: "40px", color: "var(--muted)", fontSize: "0.82rem" }}>
+          <div style={{ fontSize: "2rem", marginBottom: "12px" }}>🧺</div>
+          Loading your pantry…
+        </div>
+      )}
+      {!loading && <>
+      <div className="pantry-actions">
           <button className="btn btn-secondary btn-icon" onClick={() => setShowAddModal(true)}>+ New Category</button>
           {totalItems > 0 && <button className="btn btn-danger btn-icon" onClick={clearAll}>Clear All</button>}
+          <button className="btn btn-green btn-icon" onClick={onSave} disabled={saving || !dirty}>
+            {saving ? <><div className="spinner" />Saving…</> : dirty ? "💾 Save Pantry" : "✓ Saved"}
+          </button>
         </div>
-      </div>
       <div className="card">
         <span className="input-label">Add Ingredient to Pantry</span>
         <div className="pantry-add-row">
@@ -568,26 +580,74 @@ function PantryTab({ pantry, setPantry, categories, setCategories }) {
 
 export default function App() {
   const [showProfile, setShowProfile] = useState(false);
-  const [activeTab, setActiveTab] = useState("recipes");
-  const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
-  const [pantry, setPantry] = useState({
-    proteins: [], vegetables: [], grains: [], spices: [], oils: [], others: []
-  });
+const [pantryLoading, setPantryLoading] = useState(true);
+const [pantryDirty, setPantryDirty] = useState(false);
+const [pantrySaving, setPantrySaving] = useState(false);
+const [pantrySaveMsg, setPantrySaveMsg] = useState("");
   const [session, setSession] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [verifyEmail, setVerifyEmail] = useState(null);
-  const totalPantryItems = Object.values(pantry).flat().length;
+ const totalPantryItems = Object.values(pantry).flat().length;
 
-  useEffect(() => {
+  const handleSetPantry = (updater) => {
+    setPantry(updater);
+    setPantryDirty(true);
+  };
+
+  const handleSetCategories = (updater) => {
+    setCategories(updater);
+    setPantryDirty(true);
+  };
+
+useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setAuthLoading(false);
+      if (session) loadPantry(session.user.id);
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      if (session) loadPantry(session.user.id);
     });
     return () => subscription.unsubscribe();
   }, []);
+
+  const loadPantry = async (userId) => {
+    setPantryLoading(true);
+    try {
+      const { data } = await supabase.from("pantry").select("*").eq("user_id", userId).single();
+      if (data) {
+        setCategories(data.categories || DEFAULT_CATEGORIES);
+        setPantry(data.items || { proteins: [], vegetables: [], grains: [], spices: [], oils: [], others: [] });
+      }
+    } catch (err) {
+      console.log("No pantry found, using defaults");
+    } finally {
+      setPantryLoading(false);
+      setPantryDirty(false);
+    }
+  };
+
+  const savePantry = async () => {
+    if (!session) return;
+    setPantrySaving(true); setPantrySaveMsg("");
+    try {
+      const { error } = await supabase.from("pantry").upsert({
+        user_id: session.user.id,
+        categories,
+        items: pantry,
+        updated_at: new Date().toISOString()
+      });
+      if (error) throw error;
+      setPantryDirty(false);
+      setPantrySaveMsg("Pantry saved!");
+      setTimeout(() => setPantrySaveMsg(""), 3000);
+    } catch (err) {
+      setPantrySaveMsg("Save failed. Try again.");
+    } finally {
+      setPantrySaving(false);
+    }
+  };;
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -626,14 +686,29 @@ export default function App() {
   <p className="nigerian-badge">✦ Nigerian &amp; African cuisine featured</p>
 </header>
         <div className="tabs">
-          <button className={`tab ${activeTab === "recipes" ? "active" : ""}`} onClick={() => setActiveTab("recipes")}>🍽 Recipes</button>
+          <button className={`tab ${activeTab === "recipes" ? "active" : ""}`} onClick={() => {
+            if (activeTab === "pantry" && pantryDirty) {
+              if (!window.confirm("You have unsaved pantry changes. Leave without saving?")) return;
+            }
+            setActiveTab("recipes");
+          }}>🍽 Recipes</button>
           <button className={`tab ${activeTab === "pantry" ? "active" : ""}`} onClick={() => setActiveTab("pantry")}>
             🧺 My Pantry {totalPantryItems > 0 && <span className="tab-badge">{totalPantryItems}</span>}
           </button>
         </div>
         {activeTab === "recipes"
           ? <RecipeTab pantryIngredients={pantry} />
-          : <PantryTab pantry={pantry} setPantry={setPantry} categories={categories} setCategories={setCategories} />
+          : <PantryTab
+              pantry={pantry}
+              setPantry={handleSetPantry}
+              categories={categories}
+              setCategories={handleSetCategories}
+              onSave={savePantry}
+              saving={pantrySaving}
+              dirty={pantryDirty}
+              saveMsg={pantrySaveMsg}
+              loading={pantryLoading}
+            />
         }
           {showProfile && (
           <Profile
@@ -643,6 +718,7 @@ export default function App() {
           />
         )}
       </div>
+   </>}
     </>
   );
 }
