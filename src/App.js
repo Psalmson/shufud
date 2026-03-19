@@ -1,8 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { supabase } from "./supabaseClient";
-import Auth, { VerifyEmail } from "./Auth";
-import Profile, { AvatarButton } from "./Profile";
 import Auth, { VerifyEmail, ResetPassword } from "./Auth";
+import Profile, { AvatarButton } from "./Profile";
 
 const style = `
   @import url('https://fonts.googleapis.com/css2?family=Afacad+Flux:wght@100..1000&family=Spectral:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap');
@@ -46,19 +45,19 @@ const style = `
   .nigerian-badge { margin-top: 12px; font-size: 0.7rem; color: var(--teal); letter-spacing: 0.08em; font-weight: 500; }
 
   .tabs { display: flex; background: var(--warm-white); border: 2px solid var(--border); border-radius: 14px; padding: 4px; margin-bottom: 32px; gap: 4px; }
-  .tab { flex: 1; padding: 10px 20px; font-family: 'Afacad Flux', sans-serif; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); cursor: pointer; border-radius: 10px; border: none; background: transparent; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 500; }
+  .tab { flex: 1; padding: 10px 20px; font-family: 'Afacad Flux', sans-serif; font-size: 0.82rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); cursor: pointer; border-radius: 10px; border: none; background: transparent; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 500; }
   .tab:hover { background: var(--orange-pale); color: var(--orange); }
   .tab.active { background: var(--orange); color: white; box-shadow: 0 2px 12px rgba(255,87,10,0.35); }
   .tab-badge { background: var(--teal); color: white; font-size: 0.6rem; padding: 2px 6px; border-radius: 10px; min-width: 18px; text-align: center; }
 
   .card { background: var(--warm-white); border: 1.5px solid var(--border); border-radius: 18px; padding: 24px; margin-bottom: 20px; box-shadow: var(--card-shadow); }
-  .input-label { font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; display: block; font-weight: 500; }
+  .input-label { font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; display: block; font-weight: 500; }
   .input-row { display: flex; gap: 10px; margin-bottom: 16px; }
-  .text-input { flex: 1; padding: 12px 16px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--bg); font-family: 'Afacad Flux', sans-serif; font-size: 0.85rem; color: var(--charcoal); outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+  .text-input { flex: 1; padding: 12px 16px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--bg); font-family: 'Afacad Flux', sans-serif; font-size: 1rem; color: var(--charcoal); outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
   .text-input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(5,178,220,0.12); }
   .text-input::placeholder { color: #9ab5a2; }
 
-  .btn { padding: 12px 20px; border: none; border-radius: 10px; font-family: 'Afacad Flux', sans-serif; font-size: 0.82rem; cursor: pointer; transition: all 0.2s; white-space: nowrap; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; }
+  .btn { padding: 12px 20px; border: none; border-radius: 10px; font-family: 'Afacad Flux', sans-serif; font-size: 0.92rem; cursor: pointer; transition: all 0.2s; white-space: nowrap; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; }
   .btn-primary { background: var(--orange); color: white; }
   .btn-primary:hover:not(:disabled) { background: var(--orange-light); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(255,87,10,0.35); }
   .btn-secondary { background: var(--teal); color: white; }
@@ -69,20 +68,20 @@ const style = `
   .btn-ghost:hover { border-color: var(--teal); color: var(--teal); }
   .btn-danger { background: transparent; border: 1.5px solid var(--border); color: var(--muted); }
   .btn-danger:hover { border-color: var(--orange); color: var(--orange); background: var(--orange-pale); }
-  .btn-icon { padding: 7px 12px; font-size: 0.72rem; border-radius: 8px; }
+  .btn-icon { padding: 7px 12px; font-size: 0.78rem; border-radius: 8px; }
   .btn-full { width: 100%; padding: 16px; font-family: 'Spectral', serif; font-size: 1.05rem; justify-content: center; border-radius: 12px; letter-spacing: 0.02em; }
   .btn-full:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
   .btn-pantry { background: var(--green); color: white; margin-top: 12px; }
   .btn-pantry:hover:not(:disabled) { background: var(--green-light); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(46,83,57,0.3); }
 
   .tags { display: flex; flex-wrap: wrap; gap: 8px; min-height: 28px; }
-  .tag { background: var(--teal-pale); border: 1.5px solid #b8eaf5; border-radius: 20px; padding: 5px 12px 5px 14px; font-size: 0.78rem; color: var(--charcoal); display: flex; align-items: center; gap: 8px; animation: tagIn 0.2s ease; }
+  .tag { background: var(--teal-pale); border: 1.5px solid #b8eaf5; border-radius: 20px; padding: 5px 12px 5px 14px; font-size: 0.85rem; color: var(--charcoal); display: flex; align-items: center; gap: 8px; animation: tagIn 0.2s ease; }
   @keyframes tagIn { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
   .tag-remove { cursor: pointer; color: var(--muted); font-size: 1rem; line-height: 1; transition: color 0.15s; }
   .tag-remove:hover { color: var(--orange); }
 
   .options-row { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
-  .select-input { padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--bg); font-family: 'Afacad Flux', sans-serif; font-size: 0.78rem; color: var(--charcoal); outline: none; cursor: pointer; flex: 1; min-width: 140px; transition: border-color 0.2s; }
+  .select-input { padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--bg); font-family: 'Afacad Flux', sans-serif; font-size: 0.92rem; color: var(--charcoal); outline: none; cursor: pointer; flex: 1; min-width: 140px; transition: border-color 0.2s; }
   .select-input:focus { border-color: var(--teal); }
 
   .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
@@ -101,7 +100,7 @@ const style = `
   .recipe-title-group { flex: 1; }
   .recipe-name { font-family: 'Spectral', serif; font-size: 1.2rem; color: var(--charcoal); margin-bottom: 8px; line-height: 1.3; }
   .recipe-meta { display: flex; gap: 8px; flex-wrap: wrap; }
-  .meta-pill { font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); background: var(--green-pale); border: 1px solid var(--border); padding: 3px 10px; border-radius: 20px; font-weight: 500; }
+  .meta-pill { font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); background: var(--green-pale); border: 1px solid var(--border); padding: 3px 10px; border-radius: 20px; font-weight: 500; }
   .meta-pill.nigerian { background: var(--green); color: white; border-color: var(--green); }
   .meta-pill.match { background: var(--teal); color: white; border-color: var(--teal); }
   .meta-pill.time { background: var(--orange); color: white; border-color: var(--orange); }
@@ -109,31 +108,31 @@ const style = `
   .expand-icon.open { transform: rotate(180deg); color: var(--orange); }
 
   .recipe-body { padding: 0 24px 24px; border-top: 1.5px solid var(--border); }
-  .recipe-body h4 { font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--teal); margin: 18px 0 10px; font-weight: 600; }
-  .recipe-desc { font-size: 0.83rem; color: var(--muted); line-height: 1.65; margin-top: 12px; }
+  .recipe-body h4 { font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--teal); margin: 18px 0 10px; font-weight: 600; }
+  .recipe-desc { font-size: 0.92rem; color: var(--muted); line-height: 1.65; margin-top: 12px; }
   .ingredients-list { display: flex; flex-wrap: wrap; gap: 6px; }
-  .ing-pill { font-size: 0.75rem; padding: 4px 12px; border-radius: 16px; border: 1.5px solid var(--border); background: var(--bg); color: var(--charcoal); }
+  .ing-pill { font-size: 0.82rem; padding: 4px 12px; border-radius: 16px; border: 1.5px solid var(--border); background: var(--bg); color: var(--charcoal); }
   .ing-pill.have { background: var(--teal-pale); border-color: var(--teal); color: #037a97; }
   .steps-list { list-style: none; counter-reset: steps; }
-  .steps-list li { counter-increment: steps; display: flex; gap: 14px; margin-bottom: 12px; font-size: 0.82rem; line-height: 1.7; color: var(--charcoal); }
+  .steps-list li { counter-increment: steps; display: flex; gap: 14px; margin-bottom: 12px; font-size: 0.92rem; line-height: 1.7; color: var(--charcoal); }
   .steps-list li::before { content: counter(steps); background: var(--orange); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; flex-shrink: 0; margin-top: 2px; font-weight: 700; }
 
-  .empty-state { text-align: center; padding: 60px 24px; color: var(--muted); font-size: 0.82rem; }
+  .empty-state { text-align: center; padding: 60px 24px; color: var(--muted); font-size: 0.92rem; }
   .empty-icon { font-size: 3rem; margin-bottom: 14px; opacity: 0.4; }
-  .error-box { background: var(--orange-pale); border: 1.5px solid #ffcfb8; border-radius: 12px; padding: 14px 18px; color: var(--orange); font-size: 0.82rem; margin-top: 12px; }
+  .error-box { background: var(--orange-pale); border: 1.5px solid #ffcfb8; border-radius: 12px; padding: 14px 18px; color: var(--orange); font-size: 0.92rem; margin-top: 12px; }
 
   .telegram-note { margin-top: 40px; display: flex; gap: 16px; align-items: flex-start; background: var(--teal-pale); border-radius: 16px; padding: 20px 24px; border: 1.5px solid #b8eaf5; }
   .telegram-icon { font-size: 1.8rem; flex-shrink: 0; }
   .telegram-note h3 { font-family: 'Spectral', serif; color: var(--green); font-size: 1rem; margin-bottom: 4px; }
-  .telegram-note p { font-size: 0.76rem; color: var(--muted); line-height: 1.6; }
+  .telegram-note p { font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
   .telegram-note code { background: white; padding: 1px 6px; border-radius: 4px; font-size: 0.85em; color: var(--orange); border: 1px solid var(--border); }
 
   .pantry-top-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
   .pantry-title { font-family: 'Spectral', serif; font-size: 1.5rem; color: var(--green); }
-  .pantry-title span { font-family: 'Afacad Flux', sans-serif; font-size: 0.72rem; color: var(--muted); margin-left: 10px; }
+  .pantry-title span { font-family: 'Afacad Flux', sans-serif; font-size: 0.78rem; color: var(--muted); margin-left: 10px; }
   .pantry-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
   .pantry-add-row { display: flex; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
-  .category-select { padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--bg); font-family: 'Afacad Flux', sans-serif; font-size: 0.78rem; color: var(--charcoal); outline: none; cursor: pointer; min-width: 170px; transition: border-color 0.2s; }
+  .category-select { padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--bg); font-family: 'Afacad Flux', sans-serif; font-size: 0.92rem; color: var(--charcoal); outline: none; cursor: pointer; min-width: 170px; transition: border-color 0.2s; }
   .category-select:focus { border-color: var(--teal); }
 
   .pantry-categories { display: flex; flex-direction: column; gap: 16px; margin-top: 24px; }
@@ -142,20 +141,20 @@ const style = `
   .category-heading { padding: 12px 18px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1.5px solid var(--border); }
   .category-heading-left { display: flex; align-items: center; gap: 10px; }
   .category-color-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-  .category-name-display { font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--charcoal); font-weight: 600; }
-  .category-name-input { font-size: 0.75rem; letter-spacing: 0.06em; color: var(--charcoal); font-weight: 600; border: 1.5px solid var(--teal); border-radius: 6px; padding: 3px 10px; background: var(--bg); font-family: 'Afacad Flux', sans-serif; outline: none; width: 160px; }
-  .category-count { font-size: 0.65rem; color: var(--muted); background: var(--green-pale); border: 1px solid var(--border); padding: 2px 8px; border-radius: 10px; }
+  .category-name-display { font-size: 0.82rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--charcoal); font-weight: 600; }
+  .category-name-input { font-size: 0.82rem; letter-spacing: 0.06em; color: var(--charcoal); font-weight: 600; border: 1.5px solid var(--teal); border-radius: 6px; padding: 3px 10px; background: var(--bg); font-family: 'Afacad Flux', sans-serif; outline: none; width: 160px; }
+  .category-count { font-size: 0.7rem; color: var(--muted); background: var(--green-pale); border: 1px solid var(--border); padding: 2px 8px; border-radius: 10px; }
   .category-heading-right { display: flex; align-items: center; gap: 8px; }
   .category-items { padding: 14px 18px; display: flex; flex-wrap: wrap; gap: 8px; min-height: 52px; }
-  .category-empty { color: #9ab5a2; font-size: 0.75rem; font-style: italic; }
-  .pantry-tag { background: var(--green-pale); border: 1.5px solid var(--border); border-radius: 20px; padding: 5px 12px 5px 14px; font-size: 0.78rem; color: var(--charcoal); display: flex; align-items: center; gap: 8px; animation: tagIn 0.2s ease; transition: border-color 0.15s; }
+  .category-empty { color: #9ab5a2; font-size: 0.82rem; font-style: italic; }
+  .pantry-tag { background: var(--green-pale); border: 1.5px solid var(--border); border-radius: 20px; padding: 5px 12px 5px 14px; font-size: 0.85rem; color: var(--charcoal); display: flex; align-items: center; gap: 8px; animation: tagIn 0.2s ease; transition: border-color 0.15s; }
   .pantry-tag:hover { border-color: var(--teal); }
 
   .pantry-cook-section { margin-top: 24px; background: linear-gradient(135deg, var(--teal-pale), var(--green-pale)); border: 1.5px solid var(--teal); border-radius: 16px; padding: 22px 24px; }
   .pantry-cook-section h3 { font-family: 'Spectral', serif; color: var(--green); font-size: 1.1rem; margin-bottom: 8px; }
-  .pantry-cook-section p { font-size: 0.78rem; color: var(--muted); margin-bottom: 14px; line-height: 1.6; }
+  .pantry-cook-section p { font-size: 0.88rem; color: var(--muted); margin-bottom: 14px; line-height: 1.6; }
   .pantry-ingredient-preview { display: flex; flex-wrap: wrap; gap: 6px; }
-  .preview-pill { font-size: 0.72rem; padding: 3px 10px; border-radius: 14px; background: white; border: 1.5px solid var(--teal); color: var(--teal); font-weight: 500; }
+  .preview-pill { font-size: 0.78rem; padding: 3px 10px; border-radius: 14px; background: white; border: 1.5px solid var(--teal); color: var(--teal); font-weight: 500; }
 
   .modal-overlay { position: fixed; inset: 0; background: rgba(15,31,20,0.6); display: flex; align-items: center; justify-content: center; z-index: 100; animation: fadeIn 0.15s ease; }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -163,7 +162,7 @@ const style = `
   @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
   .modal h3 { font-family: 'Spectral', serif; color: var(--green); font-size: 1.3rem; margin-bottom: 20px; }
   .modal-field { margin-bottom: 18px; }
-  .modal-field label { font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 8px; font-weight: 500; }
+  .modal-field label { font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 8px; font-weight: 500; }
   .color-picker-row { display: flex; gap: 10px; flex-wrap: wrap; }
   .color-swatch { width: 32px; height: 32px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: transform 0.15s, border-color 0.15s; }
   .color-swatch:hover { transform: scale(1.15); }
@@ -321,7 +320,7 @@ function RecipeTab({ pantryIngredients }) {
           <button className="btn btn-primary" onClick={addIngredient}>+ Add</button>
         </div>
         <div className="tags">
-          {ingredients.length === 0 && <span style={{ color: "#9ab5a2", fontSize: "0.78rem" }}>No ingredients added yet</span>}
+          {ingredients.length === 0 && <span style={{ color: "#9ab5a2", fontSize: "0.88rem" }}>No ingredients added yet</span>}
           {ingredients.map(ing => (
             <span key={ing} className="tag">{ing}
               <span className="tag-remove" onClick={() => removeIngredient(ing)}>×</span>
@@ -477,7 +476,7 @@ function PantryTab({ pantry, setPantry, categories, setCategories, pantryStatus,
   };
 
   if (loading) return (
-    <div style={{ textAlign: "center", padding: "60px 24px", color: "var(--muted)", fontSize: "0.82rem" }}>
+    <div style={{ textAlign: "center", padding: "60px 24px", color: "var(--muted)", fontSize: "0.92rem" }}>
       <div style={{ fontSize: "2.5rem", marginBottom: "14px" }}>🧺</div>
       Loading your pantry…
     </div>
@@ -493,7 +492,7 @@ function PantryTab({ pantry, setPantry, categories, setCategories, pantryStatus,
           <button className="btn btn-secondary btn-icon" onClick={() => setShowAddModal(true)}>+ New Category</button>
           {totalItems > 0 && <button className="btn btn-danger btn-icon" onClick={clearAll}>Clear All</button>}
           <span style={{
-            fontSize: "0.7rem",
+            fontSize: "0.78rem",
             color: pantryStatus === "saving" ? "var(--teal)" : pantryStatus === "error" ? "var(--orange)" : "var(--muted)",
             display: "flex", alignItems: "center", gap: "5px"
           }}>
@@ -513,7 +512,7 @@ function PantryTab({ pantry, setPantry, categories, setCategories, pantryStatus,
             value={input} onChange={e => setInput(e.target.value)} onKeyDown={handleKeyDown} />
           <button className="btn btn-primary" onClick={addItem}>+ Add</button>
         </div>
-        <p style={{ fontSize: "0.7rem", color: "var(--muted)", marginTop: "4px" }}>Press Enter or comma to add quickly.</p>
+        <p style={{ fontSize: "0.78rem", color: "var(--muted)", marginTop: "4px" }}>Press Enter or comma to add quickly.</p>
       </div>
 
       <div className="pantry-categories">
@@ -585,11 +584,11 @@ export default function App() {
   const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
   const [pantry, setPantry] = useState({
     proteins: [], vegetables: [], grains: [], spices: [], oils: [], others: []
-  const [resetMode, setResetMode] = useState(false);
   });
   const [session, setSession] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [verifyEmail, setVerifyEmail] = useState(null);
+  const [resetMode, setResetMode] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [pantryLoading, setPantryLoading] = useState(true);
   const [pantryStatus, setPantryStatus] = useState("saved");
@@ -603,23 +602,22 @@ export default function App() {
       setAuthLoading(false);
       if (session) loadPantry(session.user.id);
     });
-    useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash;
-      if (hash.includes("type=recovery")) {
-        setResetMode(true);
-      }
-    };
-    handleHashChange();
-    window.addEventListener("hashchange", handleHashChange);
-    return () => window.removeEventListener("hashchange", handleHashChange);
-  }, []);
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       sessionRef.current = session;
       if (session) loadPantry(session.user.id);
     });
     return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+      if (hash.includes("type=recovery")) setResetMode(true);
+    };
+    handleHashChange();
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
 
   const loadPantry = async (userId) => {
@@ -683,19 +681,17 @@ export default function App() {
   const totalPantryItems = Object.values(pantry).flat().length;
 
   if (authLoading) return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f8faf8", fontFamily: "DM Mono, monospace", color: "#4a6655", fontSize: "0.85rem" }}>
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f8faf8", fontFamily: "Afacad Flux, sans-serif", color: "#4a6655", fontSize: "1rem" }}>
       Loading…
     </div>
   );
 
+  if (resetMode) return (
+    <ResetPassword onDone={() => { setResetMode(false); window.location.hash = ""; }} />
+  );
+
   if (verifyEmail) return <VerifyEmail email={verifyEmail} onBack={() => setVerifyEmail(null)} />;
   if (!session) return <Auth onVerify={(email) => setVerifyEmail(email)} />;
-if (resetMode) return (
-    <ResetPassword onDone={() => {
-      setResetMode(false);
-      window.location.hash = "";
-    }} />
-  );
 
   return (
     <>
