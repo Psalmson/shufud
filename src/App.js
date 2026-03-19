@@ -574,6 +574,7 @@ function PantryTab({ pantry, setPantry, categories, setCategories, onSave, savin
           <p>Your pantry is empty.<br />Start adding what you have at home!</p>
         </div>
       )}
+      </>}
     </>
   );
 }
