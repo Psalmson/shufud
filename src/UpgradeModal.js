@@ -7,7 +7,7 @@ const TIERS = [
     color: "#05B2DC",
     features: [
       "5 recipe suggestions/day",
-      "Meal Planner + AI Fill",
+      "Meal Planner + Auto Generate",
       "Save up to 10 favourites",
       "Recipe history (7 days)",
       "Pantry sync across devices",
@@ -22,7 +22,7 @@ const TIERS = [
     badge: "Popular",
     features: [
       "10 recipe suggestions/day",
-      "Meal Planner + AI Fill",
+      "Meal Planner + Auto Generate",
       "Save up to 50 favourites",
       "Recipe history (30 days)",
       "Pantry sync across devices",
@@ -37,7 +37,7 @@ const TIERS = [
     color: "#2E5339",
     features: [
       "Unlimited recipe suggestions",
-      "Meal Planner + AI Fill",
+      "Meal Planner + Auto Generate",
       "Unlimited saved favourites",
       "Recipe history forever",
       "Pantry sync across devices",
