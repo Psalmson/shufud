@@ -1,4 +1,4 @@
-const ADMIN_EMAILS = ["psalmsonlarinre@gmail.com"]; // add your email here
+const ADMIN_EMAILS = ["psalmsonlarinre@gmail.com"];
 
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -48,7 +48,11 @@ export default async function handler(req, res) {
       const profiles = await profilesRes.json();
       const usage = await usageRes.json();
 
-      const users = (authData.users || []).map(u => {
+      // Active auth users
+      const activeAuthIds = new Set((authData.users || []).map(u => u.id));
+
+      // Merge active auth users with profiles
+      const activeUsers = (authData.users || []).map(u => {
         const profile = profiles.find(p => p.id === u.id) || {};
         const todayUsage = usage.find(us => us.user_id === u.id);
         const createdAt = new Date(u.created_at);
@@ -66,11 +70,32 @@ export default async function handler(req, res) {
           total_recipes: profile.total_recipes_generated || 0,
           usage_today: todayUsage?.count || 0,
           trial_days_left: trialDaysLeft,
-          trial_expired: trialDaysLeft === 0 && (profile.tier || "free") === "free"
+          trial_expired: trialDaysLeft === 0 && (profile.tier || "free") === "free",
+          deleted: false
         };
       });
 
-      return res.status(200).json({ users });
+      // Deleted profiles (not in active auth users)
+      const deletedProfiles = profiles.filter(p => p.deleted === true);
+      const deletedUsers = deletedProfiles.map(p => ({
+        id: p.id,
+        email: p.email || "—",
+        created_at: p.created_at,
+        last_sign_in: null,
+        display_name: p.display_name || null,
+        tier: p.tier || "free",
+        tier_expires_at: null,
+        tier_updated_at: p.tier_updated_at || null,
+        is_admin: false,
+        total_recipes: p.total_recipes_generated || 0,
+        usage_today: 0,
+        trial_days_left: 0,
+        trial_expired: true,
+        deleted: true,
+        deleted_at: p.deleted_at
+      }));
+
+      return res.status(200).json({ users: [...activeUsers, ...deletedUsers] });
     } catch (err) {
       return res.status(500).json({ error: err.message });
     }
@@ -84,7 +109,7 @@ export default async function handler(req, res) {
     if (!validTiers.includes(tier)) return res.status(400).json({ error: "Invalid tier" });
 
     try {
-      const { error } = await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${user_id}`, {
+      await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${user_id}`, {
         method: "PATCH",
         headers: {
           apikey: supabaseKey,
@@ -104,19 +129,20 @@ export default async function handler(req, res) {
     }
   }
 
-  // ── POST reset trial ───────────────────────────────────────────────────────
-  if (req.method === "POST" && action === "reset_trial") {
+  // ── POST restore account ───────────────────────────────────────────────────
+  if (req.method === "POST" && action === "restore") {
     const { user_id } = req.body;
     if (!user_id) return res.status(400).json({ error: "user_id required" });
     try {
-      await fetch(`${supabaseUrl}/auth/v1/admin/users/${user_id}`, {
-        method: "PUT",
+      await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${user_id}`, {
+        method: "PATCH",
         headers: {
           apikey: supabaseKey,
           Authorization: `Bearer ${supabaseKey}`,
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          Prefer: "return=minimal"
         },
-        body: JSON.stringify({ created_at: new Date().toISOString() })
+        body: JSON.stringify({ deleted: false, deleted_at: null })
       });
       return res.status(200).json({ success: true });
     } catch (err) {
