@@ -2,29 +2,21 @@ import { useState } from "react";
 
 const TIERS = [
   {
-    key: "commis",
-    name: "Commis Chef",
+    key: "smart_cook",
+    name: "Smart Cook",
     price: "₦1,000",
     amount: 1000,
     color: "#05B2DC",
     features: ["5 recipes/day", "Meal Planner", "Pantry sync", "Save 10 favourites"]
   },
   {
-    key: "sous",
-    name: "Sous Chef",
+    key: "pro_chef",
+    name: "Pro Chef",
     price: "₦1,500",
     amount: 1500,
     color: "#FF570A",
-    badge: "Popular",
-    features: ["10 recipes/day", "Meal Planner", "Pantry sync", "Save 50 favourites", "YouTube videos"]
-  },
-  {
-    key: "head",
-    name: "Head Chef",
-    price: "₦2,500",
-    amount: 2500,
-    color: "#2E5339",
-    features: ["Unlimited recipes", "Meal Planner", "Pantry sync", "Unlimited favourites", "YouTube videos"]
+    badge: "Best Value",
+    features: ["Unlimited recipes", "Meal Planner", "Download Meal Plan", "Unlimited favourites", "YouTube videos"]
   }
 ];
 
@@ -40,14 +32,11 @@ const paymentStyle = `
   @keyframes pmFadeIn { from { opacity: 0; } to { opacity: 1; } }
   .payment-modal { background: var(--warm-white); border-radius: 24px; width: 100%; max-width: 520px; box-shadow: 0 20px 60px rgba(15,31,20,0.25); animation: pmSlideUp 0.25s ease; overflow: hidden; }
   @keyframes pmSlideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
-
   .payment-header { padding: 24px 28px 20px; border-bottom: 1.5px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
   .payment-header h2 { font-family: 'Spectral', serif; font-size: 1.3rem; color: var(--green); }
   .payment-close { background: var(--bg); border: 1.5px solid var(--border); border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
   .payment-close:hover { background: var(--orange-pale); border-color: var(--orange); color: var(--orange); }
-
   .payment-body { padding: 24px 28px; }
-
   .payment-tier-select { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
   .payment-tier-option { border: 2px solid var(--border); border-radius: 12px; padding: 14px 18px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: space-between; gap: 12px; position: relative; }
   .payment-tier-option:hover { border-color: var(--teal); }
@@ -61,7 +50,6 @@ const paymentStyle = `
   .payment-tier-radio { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
   .payment-tier-radio.checked { border-color: var(--green); background: var(--green); }
   .payment-tier-radio.checked::after { content: ''; width: 6px; height: 6px; background: white; border-radius: 50%; }
-
   .payment-details { background: var(--green-pale); border: 1.5px solid var(--border); border-radius: 14px; padding: 20px; margin-bottom: 20px; }
   .payment-details h3 { font-family: 'Spectral', serif; font-size: 1rem; color: var(--green); margin-bottom: 14px; }
   .payment-detail-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; gap: 12px; }
@@ -72,15 +60,12 @@ const paymentStyle = `
   .payment-copy-btn { background: var(--teal-pale); border: 1px solid var(--teal); border-radius: 6px; padding: 3px 10px; font-size: 0.72rem; color: var(--teal); cursor: pointer; font-family: 'Afacad Flux', sans-serif; font-weight: 600; transition: all 0.2s; flex-shrink: 0; }
   .payment-copy-btn:hover { background: var(--teal); color: white; }
   .payment-copy-btn.copied { background: var(--green); border-color: var(--green); color: white; }
-
   .payment-note { font-size: 0.8rem; color: var(--muted); line-height: 1.6; margin-bottom: 20px; background: var(--orange-pale); border: 1.5px solid #ffcfb8; border-radius: 10px; padding: 12px 16px; }
-
   .payment-btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-family: 'Spectral', serif; font-size: 1rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px; }
   .payment-btn-primary { background: var(--green); color: white; }
   .payment-btn-primary:hover { background: var(--green-light); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(46,83,57,0.3); }
   .payment-btn-secondary { background: transparent; border: 1.5px solid var(--border); color: var(--muted); font-family: 'Afacad Flux', sans-serif; font-size: 0.88rem; }
   .payment-btn-secondary:hover { border-color: var(--green); color: var(--green); }
-
   .confirm-icon { font-size: 3rem; text-align: center; margin-bottom: 12px; }
   .confirm-title { font-family: 'Spectral', serif; font-size: 1.3rem; color: var(--green); text-align: center; margin-bottom: 8px; }
   .confirm-sub { font-size: 0.88rem; color: var(--muted); text-align: center; line-height: 1.6; margin-bottom: 24px; }
@@ -110,7 +95,7 @@ export default function PaymentModal({ onClose, userEmail, initialTier }) {
   const [selectedTier, setSelectedTier] = useState(
     TIERS.find(t => t.key === initialTier) || TIERS[0]
   );
-  const [step, setStep] = useState("select"); // select | pay | confirm
+  const [step, setStep] = useState("select");
 
   const handleWhatsApp = () => {
     const message = encodeURIComponent(
@@ -132,10 +117,7 @@ export default function PaymentModal({ onClose, userEmail, initialTier }) {
             </h2>
             <button className="payment-close" onClick={onClose}>✕</button>
           </div>
-
           <div className="payment-body">
-
-            {/* ── STEP 1: Select tier ── */}
             {step === "select" && (
               <>
                 <div className="payment-tier-select">
@@ -156,7 +138,9 @@ export default function PaymentModal({ onClose, userEmail, initialTier }) {
                           <div className="payment-tier-features">{tier.features.join(" · ")}</div>
                         </div>
                       </div>
-                      <div className="payment-tier-price" style={{ color: tier.color }}>{tier.price}<span style={{ fontSize: "0.7rem", color: "var(--muted)", fontWeight: 400 }}>/mo</span></div>
+                      <div className="payment-tier-price" style={{ color: tier.color }}>
+                        {tier.price}<span style={{ fontSize: "0.7rem", color: "var(--muted)", fontWeight: 400 }}>/mo</span>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -167,7 +151,6 @@ export default function PaymentModal({ onClose, userEmail, initialTier }) {
               </>
             )}
 
-            {/* ── STEP 2: Pay ── */}
             {step === "pay" && (
               <>
                 <div className="payment-details">
@@ -192,11 +175,9 @@ export default function PaymentModal({ onClose, userEmail, initialTier }) {
                     <span className="payment-detail-value amount">{selectedTier.price}</span>
                   </div>
                 </div>
-
                 <div className="payment-note">
                   ⚠ Use your <strong>registered email</strong> ({userEmail}) as the transfer narration/description so we can identify your payment quickly.
                 </div>
-
                 <button className="payment-btn payment-btn-primary" onClick={() => setStep("confirm")}>
                   ✓ I Have Paid
                 </button>
@@ -206,7 +187,6 @@ export default function PaymentModal({ onClose, userEmail, initialTier }) {
               </>
             )}
 
-            {/* ── STEP 3: Confirm ── */}
             {step === "confirm" && (
               <>
                 <div className="confirm-icon">🎉</div>
