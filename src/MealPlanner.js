@@ -150,6 +150,7 @@ function RecipeModal({ mealName, pantryIngredients, onClose, session, cache, set
         body: JSON.stringify({
           model: "claude-sonnet-4-6",
           max_tokens: 1000,
+          bypass_limit: true,
           system: RECIPE_SYSTEM_PROMPT,
           messages: [{ role: "user", content: `Give me the full recipe for: ${mealName}. User has these pantry items: ${pantryItems.join(", ") || "general pantry"}.` }]
         })
