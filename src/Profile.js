@@ -10,8 +10,9 @@ const DIETARY_OPTIONS = [
   { value: "keto", label: "Keto" },
 ];
 
-const TIER_LABELS = { free: "Free", commis: "Commis Chef", sous: "Sous Chef", head: "Head Chef" };
-const TIER_COLORS = { free: "#9ab5a2", commis: "#05B2DC", sous: "#FF570A", head: "#2E5339" };
+const TIER_LABELS = { free: "Free", smart_cook: "Smart Cook", pro_chef: "Pro Chef" };
+const TIER_COLORS = { free: "#9ab5a2", smart_cook: "#05B2DC", pro_chef: "#FF570A" };
+const DAILY_LIMIT_MAP = { free: 2, smart_cook: 5, pro_chef: 999 };
 
 const getInitials = (name, email) => {
   if (name) return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
@@ -70,11 +71,11 @@ const drawerStyle = `
   .profile-header-name { font-family: 'Spectral', serif; color: white; font-size: 1.2rem; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .profile-header-email { color: rgba(255,255,255,0.7); font-size: 0.78rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 8px; }
   .profile-tier-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .profile-tier-badge { display: inline-block; background: #FF570A; color: white; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; font-weight: 600; }
+  .profile-tier-badge { display: inline-block; color: white; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; font-weight: 600; }
   .profile-upgrade-btn { display: inline-block; background: rgba(255,255,255,0.2); color: white; font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; font-weight: 600; border: 1px solid rgba(255,255,255,0.4); cursor: pointer; transition: background 0.2s; font-family: 'Afacad Flux', sans-serif; }
   .profile-upgrade-btn:hover { background: rgba(255,255,255,0.3); }
   .profile-expiry { font-size: 0.7rem; color: rgba(255,255,255,0.7); margin-top: 4px; }
-  .profile-expiry.warning { color: #ffcfb8; }
+  .profile-expiry.warning { color: #ffcfb8; font-weight: 600; }
   .profile-body { padding: 20px 24px; flex: 1; font-family: 'Afacad Flux', sans-serif; }
   .profile-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }
   .stat-card { background: white; border: 1.5px solid #d4e2d8; border-radius: 14px; padding: 14px 10px; text-align: center; box-shadow: 0 2px 8px rgba(46,83,57,0.06); }
@@ -149,7 +150,6 @@ export default function Profile({ session, onClose, onSignOut, onUpgrade }) {
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
 
-  const DAILY_LIMIT_MAP = { free: 2, commis: 5, sous: 10, head: 999 };
   const today = new Date().toISOString().split("T")[0];
 
   useEffect(() => { loadProfile(); loadUsage(); }, []);
@@ -163,8 +163,6 @@ export default function Profile({ session, onClose, onSignOut, onUpgrade }) {
       setProfile(data);
       setDisplayName(data.display_name || "");
       setDietary(data.dietary_preference || "none");
-
-      // Auto-downgrade if subscription expired
       if (data.tier !== "free" && data.tier_expires_at) {
         const expired = new Date(data.tier_expires_at) < new Date();
         if (expired) {
@@ -253,8 +251,8 @@ export default function Profile({ session, onClose, onSignOut, onUpgrade }) {
               <span className="profile-tier-badge" style={{ background: tierColor }}>
                 ✦ {tierLabel}
               </span>
-              {tier === "free" && (
-                <button className="profile-upgrade-btn" onClick={() => { onClose(); onUpgrade(); }}>
+              {tier === "free" && onUpgrade && (
+                <button className="profile-upgrade-btn" onClick={onUpgrade}>
                   ⬆ Upgrade
                 </button>
               )}
@@ -272,7 +270,6 @@ export default function Profile({ session, onClose, onSignOut, onUpgrade }) {
           {success && <div className="profile-success">✓ {success}</div>}
           {error && <div className="profile-error">⚠ {error}</div>}
 
-          {/* Subscription info */}
           {tier !== "free" && profile?.tier_expires_at && (
             <div className={`profile-sub-info ${isExpiringSoon ? "expiring" : ""}`}>
               <p>
