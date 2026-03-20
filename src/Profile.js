@@ -180,10 +180,17 @@ export default function Profile({ session, onClose, onSignOut }) {
     if (!window.confirm("Are you sure you want to delete your account? This cannot be undone.")) return;
     if (!window.confirm("Last chance — all your data will be permanently deleted. Continue?")) return;
     try {
-      await supabase.from("profiles").delete().eq("id", session.user.id);
+      // Mark profile as deleted instead of hard deleting
+      await supabase.from("profiles").update({
+        deleted: true,
+        deleted_at: new Date().toISOString()
+      }).eq("id", session.user.id);
+      // Sign out and delete auth user
       await supabase.auth.signOut();
       onSignOut();
-    } catch (err) { setError("Could not delete account. Please contact support."); }
+    } catch (err) {
+      setError("Could not delete account. Please contact support.");
+    }
   };
 
   const initials = getInitials(displayName || profile?.display_name, session?.user?.email);
