@@ -10,6 +10,9 @@ const DIETARY_OPTIONS = [
   { value: "keto", label: "Keto" },
 ];
 
+const TIER_LABELS = { free: "Free", commis: "Commis Chef", sous: "Sous Chef", head: "Head Chef" };
+const TIER_COLORS = { free: "#9ab5a2", commis: "#05B2DC", sous: "#FF570A", head: "#2E5339" };
+
 const getInitials = (name, email) => {
   if (name) return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
   return email?.slice(0, 2).toUpperCase() || "??";
@@ -19,6 +22,12 @@ const getAvatarColor = (email) => {
   const colors = ["#FF570A","#05B2DC","#2E5339","#e04e00","#037a97","#3a6647"];
   const index = email?.charCodeAt(0) % colors.length || 0;
   return colors[index];
+};
+
+const getDaysRemaining = (expiresAt) => {
+  if (!expiresAt) return null;
+  const diff = new Date(expiresAt) - new Date();
+  return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
 };
 
 function PasswordInput({ placeholder, value, onChange, className }) {
@@ -59,18 +68,23 @@ const drawerStyle = `
   .profile-avatar-large { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Spectral', serif; font-size: 1.4rem; color: white; font-weight: 700; flex-shrink: 0; border: 3px solid rgba(255,255,255,0.3); }
   .profile-header-info { flex: 1; min-width: 0; }
   .profile-header-name { font-family: 'Spectral', serif; color: white; font-size: 1.2rem; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .profile-header-email { color: rgba(255,255,255,0.7); font-size: 0.82rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .profile-tier-badge { display: inline-block; margin-top: 8px; background: #FF570A; color: white; font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; font-weight: 600; }
+  .profile-header-email { color: rgba(255,255,255,0.7); font-size: 0.78rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 8px; }
+  .profile-tier-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .profile-tier-badge { display: inline-block; background: #FF570A; color: white; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; font-weight: 600; }
+  .profile-upgrade-btn { display: inline-block; background: rgba(255,255,255,0.2); color: white; font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; font-weight: 600; border: 1px solid rgba(255,255,255,0.4); cursor: pointer; transition: background 0.2s; font-family: 'Afacad Flux', sans-serif; }
+  .profile-upgrade-btn:hover { background: rgba(255,255,255,0.3); }
+  .profile-expiry { font-size: 0.7rem; color: rgba(255,255,255,0.7); margin-top: 4px; }
+  .profile-expiry.warning { color: #ffcfb8; }
   .profile-body { padding: 20px 24px; flex: 1; font-family: 'Afacad Flux', sans-serif; }
-  .profile-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 24px; }
+  .profile-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }
   .stat-card { background: white; border: 1.5px solid #d4e2d8; border-radius: 14px; padding: 14px 10px; text-align: center; box-shadow: 0 2px 8px rgba(46,83,57,0.06); }
   .stat-value { font-family: 'Spectral', serif; font-size: 1.5rem; color: #2E5339; line-height: 1; }
-  .stat-label { font-size: 0.7rem; color: #4a6655; margin-top: 4px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .stat-label { font-size: 0.65rem; color: #4a6655; margin-top: 4px; letter-spacing: 0.06em; text-transform: uppercase; }
   .profile-section { margin-bottom: 20px; }
-  .profile-section-title { font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: #4a6655; margin-bottom: 12px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .profile-section-title { font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: #4a6655; margin-bottom: 12px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
   .profile-section-title::after { content: ''; flex: 1; height: 1px; background: #d4e2d8; }
   .profile-field { margin-bottom: 14px; }
-  .profile-label { font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: #4a6655; display: block; margin-bottom: 7px; font-weight: 600; }
+  .profile-label { font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: #4a6655; display: block; margin-bottom: 7px; font-weight: 600; }
   .profile-input { width: 100%; padding: 11px 14px; border: 1.5px solid #d4e2d8; border-radius: 10px; background: white; font-family: 'Afacad Flux', sans-serif; font-size: 1.05rem; color: #0f1f14; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
   .profile-input:focus { border-color: #05B2DC; box-shadow: 0 0 0 3px rgba(5,178,220,0.12); }
   .profile-input:disabled { background: #f0f5f1; color: #4a6655; cursor: not-allowed; }
@@ -87,6 +101,12 @@ const drawerStyle = `
   .profile-success { background: #edfaff; border: 1.5px solid #b8eaf5; border-radius: 10px; padding: 10px 14px; color: #037a97; font-size: 0.88rem; margin-bottom: 14px; }
   .profile-error { background: #fff3ee; border: 1.5px solid #ffcfb8; border-radius: 10px; padding: 10px 14px; color: #FF570A; font-size: 0.88rem; margin-bottom: 14px; }
   .profile-spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  .profile-sub-info { background: #f0f5f1; border: 1.5px solid #d4e2d8; border-radius: 10px; padding: 12px 16px; margin-bottom: 14px; }
+  .profile-sub-info p { font-size: 0.82rem; color: #4a6655; line-height: 1.6; }
+  .profile-sub-info strong { color: #2E5339; }
+  .profile-sub-info.expiring { background: #fff3ee; border-color: #ffcfb8; }
+  .profile-sub-info.expiring p { color: #FF570A; }
+  .profile-sub-info.expiring strong { color: #FF570A; }
   @keyframes spin { to { transform: rotate(360deg); } }
 `;
 
@@ -117,7 +137,7 @@ export function AvatarButton({ session, onClick }) {
   );
 }
 
-export default function Profile({ session, onClose, onSignOut }) {
+export default function Profile({ session, onClose, onSignOut, onUpgrade }) {
   const [profile, setProfile] = useState(null);
   const [displayName, setDisplayName] = useState("");
   const [dietary, setDietary] = useState("none");
@@ -129,19 +149,39 @@ export default function Profile({ session, onClose, onSignOut }) {
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
 
-  const DAILY_LIMIT = 2;
+  const DAILY_LIMIT_MAP = { free: 2, commis: 5, sous: 10, head: 999 };
   const today = new Date().toISOString().split("T")[0];
-  const memberSince = new Date(session?.user?.created_at).toLocaleDateString("en-GB", { month: "long", year: "numeric" });
 
   useEffect(() => { loadProfile(); loadUsage(); }, []);
 
   const loadProfile = async () => {
-    const { data } = await supabase.from("profiles").select("*").eq("id", session.user.id).single();
-    if (data) { setProfile(data); setDisplayName(data.display_name || ""); setDietary(data.dietary_preference || "none"); }
+    const { data } = await supabase.from("profiles")
+      .select("*")
+      .eq("id", session.user.id)
+      .single();
+    if (data) {
+      setProfile(data);
+      setDisplayName(data.display_name || "");
+      setDietary(data.dietary_preference || "none");
+
+      // Auto-downgrade if subscription expired
+      if (data.tier !== "free" && data.tier_expires_at) {
+        const expired = new Date(data.tier_expires_at) < new Date();
+        if (expired) {
+          await supabase.from("profiles").update({ tier: "free", tier_expires_at: null })
+            .eq("id", session.user.id);
+          setProfile(prev => ({ ...prev, tier: "free", tier_expires_at: null }));
+        }
+      }
+    }
   };
 
   const loadUsage = async () => {
-    const { data } = await supabase.from("usage_tracking").select("count").eq("user_id", session.user.id).eq("date", today).single();
+    const { data } = await supabase.from("usage_tracking")
+      .select("count")
+      .eq("user_id", session.user.id)
+      .eq("date", today)
+      .single();
     setUsageToday(data?.count || 0);
   };
 
@@ -180,19 +220,21 @@ export default function Profile({ session, onClose, onSignOut }) {
     if (!window.confirm("Are you sure you want to delete your account? This cannot be undone.")) return;
     if (!window.confirm("Last chance — all your data will be permanently deleted. Continue?")) return;
     try {
-      // Mark profile as deleted instead of hard deleting
       await supabase.from("profiles").update({
         deleted: true,
         deleted_at: new Date().toISOString()
       }).eq("id", session.user.id);
-      // Sign out and delete auth user
       await supabase.auth.signOut();
       onSignOut();
-    } catch (err) {
-      setError("Could not delete account. Please contact support.");
-    }
+    } catch (err) { setError("Could not delete account. Please contact support."); }
   };
 
+  const tier = profile?.tier || "free";
+  const tierColor = TIER_COLORS[tier] || "#9ab5a2";
+  const tierLabel = TIER_LABELS[tier] || "Free";
+  const dailyLimit = DAILY_LIMIT_MAP[tier] || 2;
+  const daysRemaining = getDaysRemaining(profile?.tier_expires_at);
+  const isExpiringSoon = daysRemaining !== null && daysRemaining <= 7;
   const initials = getInitials(displayName || profile?.display_name, session?.user?.email);
   const avatarColor = getAvatarColor(session?.user?.email);
 
@@ -207,7 +249,22 @@ export default function Profile({ session, onClose, onSignOut }) {
           <div className="profile-header-info">
             <div className="profile-header-name">{displayName || session?.user?.email?.split("@")[0]}</div>
             <div className="profile-header-email">{session?.user?.email}</div>
-            <span className="profile-tier-badge">✦ Free Plan</span>
+            <div className="profile-tier-row">
+              <span className="profile-tier-badge" style={{ background: tierColor }}>
+                ✦ {tierLabel}
+              </span>
+              {tier === "free" && (
+                <button className="profile-upgrade-btn" onClick={() => { onClose(); onUpgrade(); }}>
+                  ⬆ Upgrade
+                </button>
+              )}
+            </div>
+            {tier !== "free" && daysRemaining !== null && (
+              <div className={`profile-expiry ${isExpiringSoon ? "warning" : ""}`}>
+                {isExpiringSoon ? "⚠ " : "⏱ "}
+                {daysRemaining === 0 ? "Expires today!" : `${daysRemaining} day${daysRemaining !== 1 ? "s" : ""} remaining`}
+              </div>
+            )}
           </div>
         </div>
 
@@ -215,18 +272,26 @@ export default function Profile({ session, onClose, onSignOut }) {
           {success && <div className="profile-success">✓ {success}</div>}
           {error && <div className="profile-error">⚠ {error}</div>}
 
+          {/* Subscription info */}
+          {tier !== "free" && profile?.tier_expires_at && (
+            <div className={`profile-sub-info ${isExpiringSoon ? "expiring" : ""}`}>
+              <p>
+                {isExpiringSoon
+                  ? <><strong>⚠ Subscription expiring soon!</strong> Renew to keep your {tierLabel} features.</>
+                  : <>Your <strong>{tierLabel}</strong> subscription is active until <strong>{new Date(profile.tier_expires_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</strong>.</>
+                }
+              </p>
+            </div>
+          )}
+
           <div className="profile-stats">
             <div className="stat-card">
-              <div className="stat-value">{usageToday}/{DAILY_LIMIT}</div>
+              <div className="stat-value">{usageToday}/{dailyLimit === 999 ? "∞" : dailyLimit}</div>
               <div className="stat-label">Today</div>
             </div>
             <div className="stat-card">
               <div className="stat-value">{profile?.total_recipes_generated || 0}</div>
               <div className="stat-label">All Time</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-value" style={{ fontSize: "0.9rem", marginTop: "4px" }}>{memberSince.split(" ")[1]}</div>
-              <div className="stat-label">Joined {memberSince.split(" ")[0]}</div>
             </div>
           </div>
 
