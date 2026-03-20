@@ -24,9 +24,23 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Look up user by email
+    // ── Look up user by email via SQL ────────────────────────────────────────
+    const lookupRes = await fetch(
+      `${supabaseUrl}/rest/v1/rpc/get_user_id_by_email`,
+      {
+        method: "POST",
+        headers: {
+          apikey: supabaseKey,
+          Authorization: `Bearer ${supabaseKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email_input: email.toLowerCase().trim() })
+      }
+    );
+
+    // Fallback — search via auth admin list
     const listRes = await fetch(
-      `${supabaseUrl}/auth/v1/admin/users?email=${encodeURIComponent(email)}`,
+      `${supabaseUrl}/auth/v1/admin/users?per_page=1000`,
       {
         headers: {
           apikey: supabaseKey,
@@ -36,13 +50,15 @@ export default async function handler(req, res) {
     );
 
     const listData = await listRes.json();
-    const user = listData?.users?.[0];
+    const user = listData?.users?.find(
+      u => u.email?.toLowerCase() === email.toLowerCase().trim()
+    );
 
     if (!user) {
       return res.status(404).json({ error: "No account found with that email address." });
     }
 
-    // Update password
+    // ── Update password ──────────────────────────────────────────────────────
     const updateRes = await fetch(
       `${supabaseUrl}/auth/v1/admin/users/${user.id}`,
       {
