@@ -98,9 +98,11 @@ export default async function handler(req, res) {
   // ── POST update tier ───────────────────────────────────────────────────────
   if (req.method === "POST" && action === "update_tier") {
     const { user_id, tier, expires_at } = req.body;
-    if (!user_id || !tier) return res.status(400).json({ error: "user_id and tier required" });
-    const validTiers = ["free", "commis", "sous", "head"];
-    if (!validTiers.includes(tier)) return res.status(400).json({ error: "Invalid tier" });
+    if (!user_id || !tier) return res.status(400).json({ 
+      error: "user_id and tier required",
+      received: { user_id, tier, expires_at },
+      body: req.body 
+    });
 
     try {
       await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${user_id}`, {
