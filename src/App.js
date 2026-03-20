@@ -817,7 +817,7 @@ export default function App() {
                 <button className="upgrade-lock-btn" onClick={() => setShowUpgrade(true)}>View Plans</button>
               </div>
             )
-            : <MealPlanner session={session} pantryIngredients={pantry} />
+            : <MealPlanner session={session} pantryIngredients={pantry} userTier={userTier} onUpgrade={() => setShowUpgrade(true)} />
         )}
 
         {showOnboarding && (
