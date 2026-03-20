@@ -785,7 +785,7 @@ export default function App() {
           <RecipeTab
             pantryIngredients={pantry}
             userTier={userTier}
-            onUpgrade={() => setShowUpgrade(true)}
+            onUpgrade={() => { setShowProfile(false); setTimeout(() => setShowUpgrade(true), 300); }}
           />
         )}
         {activeTab === "pantry" && (
