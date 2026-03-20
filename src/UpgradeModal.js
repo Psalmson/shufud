@@ -3,8 +3,8 @@ import PaymentModal from "./PaymentModal";
 
 const TIERS = [
   {
-    key: "commis",
-    name: "Commis Chef",
+    key: "smart_cook",
+    name: "Smart Cook",
     price: "₦1,000",
     period: "/month",
     color: "#05B2DC",
@@ -14,37 +14,25 @@ const TIERS = [
       "Save up to 10 favourites",
       "Recipe history (7 days)",
       "Pantry sync across devices",
+      "Cook from Pantry",
     ]
   },
   {
-    key: "sous",
-    name: "Sous Chef",
+    key: "pro_chef",
+    name: "Pro Chef",
     price: "₦1,500",
     period: "/month",
     color: "#FF570A",
-    badge: "Popular",
-    features: [
-      "10 recipe suggestions/day",
-      "Meal Planner + Auto Generate",
-      "Save up to 50 favourites",
-      "Recipe history (30 days)",
-      "Pantry sync across devices",
-      "YouTube video suggestions",
-    ]
-  },
-  {
-    key: "head",
-    name: "Head Chef",
-    price: "₦2,500",
-    period: "/month",
-    color: "#2E5339",
+    badge: "Best Value",
     features: [
       "Unlimited recipe suggestions",
       "Meal Planner + Auto Generate",
-      "Unlimited saved favourites",
+      "Download Meal Plan (PDF)",
+      "Save unlimited favourites",
       "Recipe history forever",
       "Pantry sync across devices",
-      "YouTube video suggestions",
+      "Cook from Pantry",
+      "▶ YouTube video guides",
     ]
   }
 ];
@@ -54,7 +42,7 @@ const upgradeStyle = `
 
   .upgrade-overlay { position: fixed; inset: 0; background: rgba(15,31,20,0.7); display: flex; align-items: center; justify-content: center; z-index: 300; animation: upgradeFadeIn 0.2s ease; padding: 20px; overflow-y: auto; }
   @keyframes upgradeFadeIn { from { opacity: 0; } to { opacity: 1; } }
-  .upgrade-modal { background: var(--warm-white); border-radius: 24px; width: 100%; max-width: 680px; box-shadow: 0 20px 60px rgba(15,31,20,0.25); animation: upgradeSlideUp 0.25s ease; overflow: hidden; }
+  .upgrade-modal { background: var(--warm-white); border-radius: 24px; width: 100%; max-width: 560px; box-shadow: 0 20px 60px rgba(15,31,20,0.25); animation: upgradeSlideUp 0.25s ease; overflow: hidden; }
   @keyframes upgradeSlideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
   .upgrade-header { background: var(--green); padding: 28px 32px 24px; text-align: center; position: relative; }
   .upgrade-header h2 { font-family: 'Spectral', serif; color: white; font-size: 1.6rem; margin-bottom: 8px; }
@@ -62,7 +50,7 @@ const upgradeStyle = `
   .upgrade-dismiss { position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.15); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
   .upgrade-dismiss:hover { background: rgba(255,255,255,0.25); }
   .upgrade-body { padding: 24px 28px 32px; }
-  .upgrade-tiers { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .upgrade-tiers { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
   .upgrade-tier { border: 2px solid var(--border); border-radius: 16px; padding: 20px 16px; text-align: center; transition: all 0.2s; position: relative; cursor: pointer; }
   .upgrade-tier:hover { box-shadow: 0 6px 24px rgba(46,83,57,0.12); transform: translateY(-2px); }
   .upgrade-tier-badge { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: var(--orange); color: white; font-size: 0.62rem; padding: 3px 12px; border-radius: 20px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; }
