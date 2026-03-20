@@ -749,15 +749,23 @@ export default function App() {
       <div className="app">
         <header className="header">
           <div style={{ position: "absolute", top: "20px", right: "24px", display: "flex", gap: "8px", alignItems: "center" }}>
-            {session?.user?.email === ADMIN_EMAIL && (
-              <button onClick={() => setShowAdmin(true)} style={{
-                background: "var(--green)", border: "none", color: "white",
-                padding: "6px 12px", borderRadius: "8px", fontSize: "0.72rem",
-                cursor: "pointer", fontFamily: "Afacad Flux, sans-serif", fontWeight: 600
-              }}>⚙ Admin</button>
-            )}
-            <AvatarButton session={session} onClick={() => setShowProfile(true)} />
-          </div>
+  {session?.user?.email === ADMIN_EMAIL && (
+    <button onClick={() => setShowAdmin(true)} style={{
+      background: "var(--green)", border: "none", color: "white",
+      padding: "6px 12px", borderRadius: "8px", fontSize: "0.72rem",
+      cursor: "pointer", fontFamily: "Afacad Flux, sans-serif", fontWeight: 600
+    }}>⚙ Admin</button>
+  )}
+  {userTier === "free" && (
+    <button onClick={() => setShowUpgrade(true)} style={{
+      background: "var(--orange)", border: "none", color: "white",
+      padding: "6px 14px", borderRadius: "8px", fontSize: "0.72rem",
+      cursor: "pointer", fontFamily: "Afacad Flux, sans-serif", fontWeight: 600,
+      transition: "all 0.2s"
+    }}>⬆ Upgrade</button>
+  )}
+  <AvatarButton session={session} onClick={() => setShowProfile(true)} />
+</div>
           <div className="header-accent">
             <span style={{ background: "#2E5339", flex: 1 }} />
             <span style={{ background: "#FF570A", flex: 1 }} />
