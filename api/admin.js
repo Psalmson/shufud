@@ -14,7 +14,6 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: "Server not configured" });
   }
 
-  // Verify admin
   const authHeader = req.headers.authorization;
   if (!authHeader) return res.status(401).json({ error: "Unauthorized" });
 
@@ -48,10 +47,6 @@ export default async function handler(req, res) {
       const profiles = await profilesRes.json();
       const usage = await usageRes.json();
 
-      // Active auth users
-      const activeAuthIds = new Set((authData.users || []).map(u => u.id));
-
-      // Merge active auth users with profiles
       const activeUsers = (authData.users || []).map(u => {
         const profile = profiles.find(p => p.id === u.id) || {};
         const todayUsage = usage.find(us => us.user_id === u.id);
@@ -75,8 +70,7 @@ export default async function handler(req, res) {
         };
       });
 
-      // Deleted profiles (not in active auth users)
-      const deletedProfiles = profiles.filter(p => p.deleted === true);
+      const deletedProfiles = (profiles || []).filter(p => p.deleted === true);
       const deletedUsers = deletedProfiles.map(p => ({
         id: p.id,
         email: p.email || "—",
@@ -103,7 +97,7 @@ export default async function handler(req, res) {
 
   // ── POST update tier ───────────────────────────────────────────────────────
   if (req.method === "POST" && action === "update_tier") {
-    const { user_id, tier } = req.body;
+    const { user_id, tier, expires_at } = req.body;
     if (!user_id || !tier) return res.status(400).json({ error: "user_id and tier required" });
     const validTiers = ["free", "commis", "sous", "head"];
     if (!validTiers.includes(tier)) return res.status(400).json({ error: "Invalid tier" });
@@ -120,7 +114,7 @@ export default async function handler(req, res) {
         body: JSON.stringify({
           tier,
           tier_updated_at: new Date().toISOString(),
-          tier_expires_at: tier === "free" ? null : new Date(Date.now() + 31 * 24 * 60 * 60 * 1000).toISOString()
+          tier_expires_at: expires_at || null
         })
       });
       return res.status(200).json({ success: true });
