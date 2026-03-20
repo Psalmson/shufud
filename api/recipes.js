@@ -47,17 +47,11 @@ export default async function handler(req, res) {
 
   const { model, max_tokens, system, messages, bypass_limit } = req.body;
 
+  // ── Bypassed — call Claude directly without limit check ───────────────────
   if (bypass_limit) {
     try {
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey,
-          "anthropic-version": "2023-06-01"
-        },
-        body: JSON.stringify({ model, max_tokens, system, messages })
-      });
+      const response = await callClaude(apiKey, { model, max_tokens, system, messages });
+      if (!response) return res.status(529).json({ error: "Claude API is temporarily busy. Please try again in a moment." });
       const data = await response.json();
       if (!response.ok) return res.status(response.status).json({ error: "Claude API error", details: data });
       return res.status(200).json(data);
@@ -66,6 +60,7 @@ export default async function handler(req, res) {
     }
   }
 
+  // ── Get user tier ─────────────────────────────────────────────────────────
   const profileRes = await fetch(
     `${supabaseUrl}/rest/v1/profiles?id=eq.${userData.id}&select=tier`,
     { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
@@ -75,6 +70,7 @@ export default async function handler(req, res) {
   const TIER_LIMITS = { free: 2, smart_cook: 5, pro_chef: 999 };
   const DAILY_LIMIT = TIER_LIMITS[tier] || 2;
 
+  // ── Daily limit check ─────────────────────────────────────────────────────
   const userId = userData.id;
   const today = new Date().toISOString().split("T")[0];
 
@@ -102,20 +98,15 @@ export default async function handler(req, res) {
     });
   }
 
+  // ── Call Claude API ────────────────────────────────────────────────────────
   try {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01"
-      },
-      body: JSON.stringify({ model, max_tokens, system, messages })
-    });
+    const response = await callClaude(apiKey, { model, max_tokens, system, messages });
+    if (!response) return res.status(529).json({ error: "Claude API is temporarily busy. Please try again in a moment." });
 
     const data = await response.json();
     if (!response.ok) return res.status(response.status).json({ error: "Claude API error", details: data });
 
+    // ── Update usage count ───────────────────────────────────────────────────
     if (currentUsage) {
       await fetch(
         `${supabaseUrl}/rest/v1/usage_tracking?user_id=eq.${userId}&date=eq.${today}`,
