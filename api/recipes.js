@@ -1,3 +1,20 @@
+const callClaude = async (apiKey, body, retries = 3) => {
+  for (let i = 0; i < retries; i++) {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01"
+      },
+      body: JSON.stringify(body)
+    });
+    if (response.status !== 529) return response;
+    if (i < retries - 1) await new Promise(r => setTimeout(r, 1000 * (i + 1)));
+  }
+  return null;
+};
+
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
