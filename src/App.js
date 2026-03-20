@@ -829,12 +829,13 @@ export default function App() {
         )}
 
         {showProfile && (
-          <Profile
-            session={session}
-            onClose={() => setShowProfile(false)}
-            onSignOut={async () => { await supabase.auth.signOut(); setSession(null); setShowProfile(false); }}
-          />
-        )}
+  <Profile
+    session={session}
+    onClose={() => setShowProfile(false)}
+    onSignOut={async () => { await supabase.auth.signOut(); setSession(null); setShowProfile(false); }}
+    onUpgrade={() => { setShowProfile(false); setTimeout(() => setShowUpgrade(true), 300); }}
+  />
+)}
 
         {showUpgrade && (
           <UpgradeModal
