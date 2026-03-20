@@ -25,21 +25,27 @@ const adminStyle = `
   .admin-filter { padding: 10px 14px; border: 1.5px solid #d4e2d8; border-radius: 10px; font-family: 'Afacad Flux', sans-serif; font-size: 0.88rem; outline: none; background: white; cursor: pointer; }
   .admin-refresh-btn { padding: 10px 16px; background: #2E5339; color: white; border: none; border-radius: 10px; cursor: pointer; font-family: 'Afacad Flux', sans-serif; font-size: 0.88rem; transition: all 0.2s; }
   .admin-refresh-btn:hover { background: #3a6647; }
+  .admin-deleted-toggle { padding: 10px 16px; border: 1.5px solid #d4e2d8; border-radius: 10px; font-family: 'Afacad Flux', sans-serif; font-size: 0.88rem; cursor: pointer; background: white; color: #4a6655; transition: all 0.2s; }
+  .admin-deleted-toggle.active { background: #fff3ee; border-color: #FF570A; color: #FF570A; }
   .admin-table-wrap { background: white; border: 1.5px solid #d4e2d8; border-radius: 16px; overflow: auto; box-shadow: 0 2px 12px rgba(46,83,57,0.06); }
   .admin-table { width: 100%; border-collapse: collapse; min-width: 800px; }
   .admin-table th { padding: 12px 16px; text-align: left; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: #4a6655; border-bottom: 1.5px solid #d4e2d8; background: #f8faf8; font-weight: 600; white-space: nowrap; }
   .admin-table td { padding: 14px 16px; border-bottom: 1px solid #f0f5f1; font-size: 0.88rem; color: #0f1f14; vertical-align: middle; }
   .admin-table tr:last-child td { border-bottom: none; }
   .admin-table tr:hover td { background: #f8faf8; }
+  .admin-table tr.deleted-row td { opacity: 0.6; background: #fafafa; }
   .tier-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: white; }
   .trial-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.68rem; font-weight: 600; }
   .trial-badge.active { background: #edfaff; color: #037a97; border: 1px solid #b8eaf5; }
   .trial-badge.expired { background: #fff3ee; color: #FF570A; border: 1px solid #ffcfb8; }
+  .deleted-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.68rem; font-weight: 600; background: #f0f0f0; color: #888; border: 1px solid #ddd; }
   .admin-tier-select { padding: 6px 10px; border: 1.5px solid #d4e2d8; border-radius: 8px; font-family: 'Afacad Flux', sans-serif; font-size: 0.82rem; outline: none; cursor: pointer; background: white; transition: border-color 0.2s; }
   .admin-tier-select:focus { border-color: #05B2DC; }
   .admin-update-btn { padding: 6px 14px; background: #FF570A; color: white; border: none; border-radius: 8px; cursor: pointer; font-family: 'Afacad Flux', sans-serif; font-size: 0.82rem; font-weight: 600; transition: all 0.2s; margin-left: 8px; }
   .admin-update-btn:hover:not(:disabled) { background: #ff7033; }
   .admin-update-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .admin-restore-btn { padding: 6px 14px; background: #2E5339; color: white; border: none; border-radius: 8px; cursor: pointer; font-family: 'Afacad Flux', sans-serif; font-size: 0.82rem; font-weight: 600; transition: all 0.2s; }
+  .admin-restore-btn:hover { background: #3a6647; }
   .admin-loading { text-align: center; padding: 60px; color: #4a6655; }
   .admin-error { background: #fff3ee; border: 1.5px solid #ffcfb8; border-radius: 12px; padding: 14px 18px; color: #FF570A; margin-bottom: 20px; font-size: 0.92rem; }
   .admin-empty { text-align: center; padding: 40px; color: #4a6655; font-size: 0.92rem; }
@@ -55,6 +61,7 @@ export default function Admin({ session, onBack }) {
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [tierFilter, setTierFilter] = useState("all");
+  const [showDeleted, setShowDeleted] = useState(false);
   const [updating, setUpdating] = useState({});
   const [selectedTiers, setSelectedTiers] = useState({});
   const [toast, setToast] = useState("");
@@ -103,12 +110,31 @@ export default function Admin({ session, onBack }) {
     } finally { setUpdating(p => ({ ...p, [userId]: false })); }
   };
 
+  const restoreAccount = async (userId) => {
+    setUpdating(p => ({ ...p, [userId]: true }));
+    try {
+      const token = await getToken();
+      const res = await fetch("/api/admin?action=restore", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ user_id: userId })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setUsers(prev => prev.map(u => u.id === userId ? { ...u, deleted: false, deleted_at: null } : u));
+      showToast("✓ Account restored");
+    } catch (err) {
+      setError(err.message);
+    } finally { setUpdating(p => ({ ...p, [userId]: false })); }
+  };
+
   const showToast = (msg) => {
     setToast(msg);
     setTimeout(() => setToast(""), 3000);
   };
 
   const filtered = users.filter(u => {
+    if (!showDeleted && u.deleted) return false;
     const matchSearch = !search ||
       u.email?.toLowerCase().includes(search.toLowerCase()) ||
       u.display_name?.toLowerCase().includes(search.toLowerCase());
@@ -116,12 +142,15 @@ export default function Admin({ session, onBack }) {
     return matchSearch && matchTier;
   });
 
+  const activeUsers = users.filter(u => !u.deleted);
+  const deletedUsers = users.filter(u => u.deleted);
+
   const stats = {
-    total: users.length,
-    active_today: users.filter(u => u.usage_today > 0).length,
-    trial_expired: users.filter(u => u.trial_expired).length,
-    paid: users.filter(u => u.tier !== "free").length,
-    free: users.filter(u => u.tier === "free").length,
+    total: activeUsers.length,
+    active_today: activeUsers.filter(u => u.usage_today > 0).length,
+    trial_expired: activeUsers.filter(u => u.trial_expired).length,
+    paid: activeUsers.filter(u => u.tier !== "free").length,
+    deleted: deletedUsers.length,
   };
 
   return (
@@ -151,12 +180,12 @@ export default function Admin({ session, onBack }) {
               <div className="admin-stat-label">Paid Users</div>
             </div>
             <div className="admin-stat">
-              <div className="admin-stat-value">{stats.free}</div>
-              <div className="admin-stat-label">Free Users</div>
+              <div className="admin-stat-value">{stats.trial_expired}</div>
+              <div className="admin-stat-label">Trial Expired</div>
             </div>
             <div className="admin-stat">
-              <div className="admin-stat-value" style={{ color: "#FF570A" }}>{stats.trial_expired}</div>
-              <div className="admin-stat-label">Trial Expired</div>
+              <div className="admin-stat-value" style={{ color: "#FF570A" }}>{stats.deleted}</div>
+              <div className="admin-stat-label">Deleted</div>
             </div>
           </div>
           <div className="admin-toolbar">
@@ -166,6 +195,11 @@ export default function Admin({ session, onBack }) {
               <option value="all">All Tiers</option>
               {TIERS.map(t => <option key={t} value={t}>{TIER_LABELS[t]}</option>)}
             </select>
+            <button
+              className={`admin-deleted-toggle ${showDeleted ? "active" : ""}`}
+              onClick={() => setShowDeleted(p => !p)}>
+              🗑 {showDeleted ? "Hide" : "Show"} Deleted ({stats.deleted})
+            </button>
             <button className="admin-refresh-btn" onClick={loadUsers}>↻ Refresh</button>
           </div>
           {loading ? (
@@ -180,19 +214,19 @@ export default function Admin({ session, onBack }) {
                   <tr>
                     <th>User</th>
                     <th>Joined</th>
-                    <th>Trial</th>
+                    <th>Status</th>
                     <th>Current Tier</th>
                     <th>Usage Today</th>
                     <th>All Time</th>
                     <th>Last Active</th>
-                    <th>Update Tier</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filtered.length === 0 ? (
                     <tr><td colSpan="8"><div className="admin-empty">No users found</div></td></tr>
                   ) : filtered.map(user => (
-                    <tr key={user.id}>
+                    <tr key={user.id} className={user.deleted ? "deleted-row" : ""}>
                       <td>
                         <div style={{ fontWeight: 600 }}>{user.display_name || "—"}</div>
                         <div style={{ fontSize: "0.78rem", color: "#4a6655" }}>{user.email}</div>
@@ -201,11 +235,22 @@ export default function Admin({ session, onBack }) {
                         {new Date(user.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
                       </td>
                       <td>
-                        {user.tier === "free" ? (
+                        {user.deleted ? (
+                          <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                            <span className="deleted-badge">🗑 Deleted</span>
+                            {user.deleted_at && (
+                              <span style={{ fontSize: "0.7rem", color: "#aaa" }}>
+                                {new Date(user.deleted_at).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+                              </span>
+                            )}
+                          </div>
+                        ) : user.tier === "free" ? (
                           <span className={`trial-badge ${user.trial_expired ? "expired" : "active"}`}>
-                            {user.trial_expired ? "Expired" : `${user.trial_days_left}d left`}
+                            {user.trial_expired ? "Trial Expired" : `${user.trial_days_left}d left`}
                           </span>
-                        ) : <span style={{ fontSize: "0.78rem", color: "#4a6655" }}>N/A</span>}
+                        ) : (
+                          <span className="trial-badge active">Active</span>
+                        )}
                       </td>
                       <td>
                         <span className="tier-badge" style={{ background: TIER_COLORS[user.tier] }}>
@@ -220,18 +265,26 @@ export default function Admin({ session, onBack }) {
                           : "—"}
                       </td>
                       <td>
-                        <div style={{ display: "flex", alignItems: "center" }}>
-                          <select className="admin-tier-select"
-                            value={selectedTiers[user.id] || user.tier}
-                            onChange={e => setSelectedTiers(p => ({ ...p, [user.id]: e.target.value }))}>
-                            {TIERS.map(t => <option key={t} value={t}>{TIER_LABELS[t]}</option>)}
-                          </select>
-                          <button className="admin-update-btn"
-                            onClick={() => updateTier(user.id)}
-                            disabled={updating[user.id] || selectedTiers[user.id] === user.tier}>
-                            {updating[user.id] ? "…" : "Save"}
+                        {user.deleted ? (
+                          <button className="admin-restore-btn"
+                            onClick={() => restoreAccount(user.id)}
+                            disabled={updating[user.id]}>
+                            {updating[user.id] ? "…" : "↺ Restore"}
                           </button>
-                        </div>
+                        ) : (
+                          <div style={{ display: "flex", alignItems: "center" }}>
+                            <select className="admin-tier-select"
+                              value={selectedTiers[user.id] || user.tier}
+                              onChange={e => setSelectedTiers(p => ({ ...p, [user.id]: e.target.value }))}>
+                              {TIERS.map(t => <option key={t} value={t}>{TIER_LABELS[t]}</option>)}
+                            </select>
+                            <button className="admin-update-btn"
+                              onClick={() => updateTier(user.id)}
+                              disabled={updating[user.id] || selectedTiers[user.id] === user.tier}>
+                              {updating[user.id] ? "…" : "Save"}
+                            </button>
+                          </div>
+                        )}
                       </td>
                     </tr>
                   ))}
