@@ -30,7 +30,6 @@ export default async function handler(req, res) {
 
   const { model, max_tokens, system, messages, bypass_limit } = req.body;
 
-  // ── Bypassed — call Claude directly without limit check ───────────────────
   if (bypass_limit) {
     try {
       const response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -50,17 +49,15 @@ export default async function handler(req, res) {
     }
   }
 
-  // ── Get user tier ─────────────────────────────────────────────────────────
   const profileRes = await fetch(
     `${supabaseUrl}/rest/v1/profiles?id=eq.${userData.id}&select=tier`,
     { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
   );
   const profileData = await profileRes.json();
   const tier = profileData?.[0]?.tier || "free";
-  const TIER_LIMITS = { free: 2, commis: 5, sous: 10, head: 999 };
+  const TIER_LIMITS = { free: 2, smart_cook: 5, pro_chef: 999 };
   const DAILY_LIMIT = TIER_LIMITS[tier] || 2;
 
-  // ── Daily limit check ─────────────────────────────────────────────────────
   const userId = userData.id;
   const today = new Date().toISOString().split("T")[0];
 
@@ -88,7 +85,6 @@ export default async function handler(req, res) {
     });
   }
 
-  // ── Call Claude API ────────────────────────────────────────────────────────
   try {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
