@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { supabase } from "./supabaseClient";
 
-const TIERS = ["free", "commis", "sous", "head"];
-const TIER_COLORS = { free: "#9ab5a2", commis: "#05B2DC", sous: "#FF570A", head: "#2E5339" };
-const TIER_LABELS = { free: "Free", commis: "Commis", sous: "Sous Chef", head: "Head Chef" };
+const TIERS = ["free", "smart_cook", "pro_chef"];
+const TIER_COLORS = { free: "#9ab5a2", smart_cook: "#05B2DC", pro_chef: "#FF570A" };
+const TIER_LABELS = { free: "Free", smart_cook: "Smart Cook", pro_chef: "Pro Chef" };
 const SUBSCRIPTION_PERIODS = [
   { label: "7 Days", days: 7 },
   { label: "30 Days", days: 30 },
@@ -44,7 +44,6 @@ const adminStyle = `
   .trial-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.68rem; font-weight: 600; }
   .trial-badge.active { background: #edfaff; color: #037a97; border: 1px solid #b8eaf5; }
   .trial-badge.expired { background: #fff3ee; color: #FF570A; border: 1px solid #ffcfb8; }
-  .trial-badge.expiring { background: #fff3ee; color: #FF570A; border: 1px solid #ffcfb8; }
   .deleted-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.68rem; font-weight: 600; background: #f0f0f0; color: #888; border: 1px solid #ddd; }
   .admin-tier-select { padding: 6px 10px; border: 1.5px solid #d4e2d8; border-radius: 8px; font-family: 'Afacad Flux', sans-serif; font-size: 0.82rem; outline: none; cursor: pointer; background: white; transition: border-color 0.2s; }
   .admin-tier-select:focus { border-color: #05B2DC; }
@@ -53,8 +52,6 @@ const adminStyle = `
   .admin-update-btn:disabled { opacity: 0.5; cursor: not-allowed; }
   .admin-restore-btn { padding: 6px 14px; background: #2E5339; color: white; border: none; border-radius: 8px; cursor: pointer; font-family: 'Afacad Flux', sans-serif; font-size: 0.82rem; font-weight: 600; transition: all 0.2s; }
   .admin-restore-btn:hover { background: #3a6647; }
-  .admin-expiry { font-size: 0.72rem; color: #4a6655; margin-top: 3px; }
-  .admin-expiry.warning { color: #FF570A; }
   .admin-loading { text-align: center; padding: 60px; color: #4a6655; }
   .admin-error { background: #fff3ee; border: 1.5px solid #ffcfb8; border-radius: 12px; padding: 14px 18px; color: #FF570A; margin-bottom: 20px; font-size: 0.92rem; }
   .admin-empty { text-align: center; padding: 40px; color: #4a6655; font-size: 0.92rem; }
