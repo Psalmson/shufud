@@ -1,3 +1,4 @@
+import RecipeHistory from "./RecipeHistory";
 import { useState, useRef, useEffect } from "react";
 import { supabase } from "./supabaseClient";
 import Auth, { VerifyEmail } from "./Auth";
@@ -318,7 +319,28 @@ function RecipeTab({ pantryIngredients, userTier, onUpgrade }) {
       const text = data.content?.map(b => b.text || "").join("") || "";
       const parsed = JSON.parse(text.replace(/```json|```/g, "").trim());
       setRecipes(parsed.recipes || []);
-      if (parsed.recipes?.length) setExpanded({ 0: true });
+      if (parsed.recipes?.length) {
+  setExpanded({ 0: true });
+  try {
+    const { data: { session: s } } = await supabase.auth.getSession();
+    if (s) {
+      const historyEntries = parsed.recipes.map(r => ({
+        user_id: s.user.id,
+        recipe_name: r.name,
+        cuisine: r.cuisine || null,
+        description: r.description || null,
+        ingredients: r.ingredientsNeeded || [],
+        steps: r.steps || [],
+        time: r.time || null,
+        difficulty: r.difficulty || null,
+        servings: r.servings || null
+      }));
+      await supabase.from("recipe_history").insert(historyEntries);
+    }
+  } catch (err) {
+    console.log("History save error", err);
+  }
+}
       // Save to history
 if (parsed.recipes?.length) {
   const { data: { session: s } } = await supabase.auth.getSession();
@@ -468,7 +490,7 @@ if (parsed.recipes?.length) {
           <p>Add ingredients and hit <strong>Suggest Recipes</strong>{allPantryItems.length > 0 ? ", or cook from your pantry!" : ""}</p>
         </div>
       )}
-
+      <RecipeHistory userTier={userTier} onUpgrade={onUpgrade} />
       <div className="telegram-note" style={{ marginTop: "40px" }}>
         <span className="telegram-icon">🤖</span>
         <div>
