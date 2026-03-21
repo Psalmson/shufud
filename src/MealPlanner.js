@@ -382,7 +382,7 @@ export default function MealPlanner({ session, pantryIngredients, userTier, onUp
       <style>{plannerStyle}</style>
 
       {/* ── Hidden print layout ── */}
-      <div id="shufud-meal-plan-print" style={{ display: "none" }}>
+      <div id="shufud-meal-plan-print" style={{ display: "none", fontFamily: "Arial, sans-serif" }}>
         <div className="print-header">
           <div className="print-title"><em>Shufud</em></div>
           <div className="print-week">Meal Plan · {formatWeekLabel(weekStart)}</div>
