@@ -249,7 +249,7 @@ function RecipeModal({ mealName, pantryItems, userTier, onClose, onUpgrade }) {
               <div>
                 {userTier === "pro_chef" ? (
                   
-                    href={`https://www.youtube.com/results?search_query=${encodeURIComponent(mealName + " Nigerian recipe how to cook")}`}
+                    href={"https://www.youtube.com/results?search_query=" + encodeURIComponent(mealName + " Nigerian recipe how to cook")}
                     target="_blank"
                     rel="noreferrer"
                     className="recipe-modal-yt"
