@@ -5,12 +5,19 @@ export default async function handler(req, res) {
 
     const webhookUrl = `https://shufud.vercel.app/api/telegram`;
 
+    // First delete existing webhook
+    await fetch(`https://api.telegram.org/bot${token}/deleteWebhook`);
+
+    // Set new webhook
     const response = await fetch(
       `https://api.telegram.org/bot${token}/setWebhook`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: webhookUrl })
+        body: JSON.stringify({
+          url: webhookUrl,
+          allowed_updates: ["message"]
+        })
       }
     );
 
