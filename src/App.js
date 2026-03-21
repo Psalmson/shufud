@@ -427,9 +427,9 @@ function RecipeTab({ pantryIngredients, userTier, onUpgrade }) {
                     {recipe.steps?.map((step, j) => <li key={j}>{step}</li>)}
                   </ol>
                   <div style={{ marginTop: "16px" }}>
-                    {userTier === "pro_chef" ? (
+                   {userTier === "pro_chef" ? (
                       
-                      </ahref={"https://www.youtube.com/results?search_query=" + encodeURIComponent(recipe.name + " Nigerian recipe how to cook")}
+                        href={"https://www.youtube.com/results?search_query=" + encodeURIComponent(recipe.name + " Nigerian recipe how to cook")}
                         target="_blank"
                         rel="noreferrer"
                         style={{
