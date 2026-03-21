@@ -494,8 +494,8 @@ if (parsed.recipes?.length) {
       <div className="telegram-note" style={{ marginTop: "40px" }}>
         <span className="telegram-icon">🤖</span>
         <div>
-          <h3>Shufud on Telegram</h3>
-          <p>Chat with Shufud as a bot. Try: <code>/recipe palm oil, tomatoes, stockfish</code></p>
+          <h3>Shufud on Telegram <span style={{ fontSize: "0.62rem", background: "var(--orange)", color: "white", padding: "2px 8px", borderRadius: "10px", fontFamily: "Afacad Flux, sans-serif", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", verticalAlign: "middle", marginLeft: "6px" }}>Coming Soon</span></h3>
+          <p>Soon you'll be able to chat with Shufud directly on Telegram and get recipe suggestions on the go!</p>
         </div>
       </div>
     </>
