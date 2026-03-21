@@ -363,12 +363,17 @@ export default function MealPlanner({ session, pantryIngredients, userTier, onUp
   };
 
   const downloadPDF = () => {
-    setDownloading(true);
+  setDownloading(true);
+  const printDiv = document.getElementById("shufud-meal-plan-print");
+  if (printDiv) printDiv.style.display = "block";
+  setTimeout(() => {
+    window.print();
     setTimeout(() => {
-      window.print();
+      if (printDiv) printDiv.style.display = "none";
       setDownloading(false);
-    }, 300);
-  };
+    }, 1000);
+  }, 300);
+};
 
   const hasPlan = DAYS.some(day => MEAL_SLOTS.some(slot => getCellValue(day, slot)));
 
