@@ -440,7 +440,9 @@ function RecipeTab({ pantryIngredients, userTier, onUpgrade }) {
                           fontFamily: "Afacad Flux, sans-serif"
                         }}
                       >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+                          <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                        </svg>
                         ▶ Watch on YouTube
                       </a>
                     ) : (
@@ -459,6 +461,11 @@ function RecipeTab({ pantryIngredients, userTier, onUpgrade }) {
                       </button>
                     )}
                   </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       )}
 
       {!loading && !recipes.length && !error && (
@@ -678,8 +685,20 @@ export default function App() {
         .select("tier, tier_expires_at, onboarding_completed")
         .eq("id", session.user.id)
         .single();
-      const tier = data?.tier || "free";
+
+      let tier = data?.tier || "free";
+
+      if (tier !== "free" && data?.tier_expires_at) {
+        const expired = new Date(data.tier_expires_at) < new Date();
+        if (expired) {
+          await supabase.from("profiles").update({ tier: "free", tier_expires_at: null })
+            .eq("id", session.user.id);
+          tier = "free";
+        }
+      }
+
       setUserTier(tier);
+
       if (tier === "free") {
         const created = new Date(session.user.created_at);
         const daysUsed = Math.floor((Date.now() - created) / (1000 * 60 * 60 * 24));
@@ -688,7 +707,7 @@ export default function App() {
         setTrialExpired(daysLeft === 0);
         if (daysLeft <= 3) setShowUpgrade(true);
       }
-      // Show onboarding if not completed
+
       if (!data?.onboarding_completed) {
         setShowOnboarding(true);
       }
@@ -777,23 +796,23 @@ export default function App() {
       <div className="app">
         <header className="header">
           <div style={{ position: "absolute", top: "20px", right: "24px", display: "flex", gap: "8px", alignItems: "center" }}>
-  {session?.user?.email === ADMIN_EMAIL && (
-    <button onClick={() => setShowAdmin(true)} style={{
-      background: "var(--green)", border: "none", color: "white",
-      padding: "6px 12px", borderRadius: "8px", fontSize: "0.72rem",
-      cursor: "pointer", fontFamily: "Afacad Flux, sans-serif", fontWeight: 600
-    }}>⚙ Admin</button>
-  )}
-  {userTier === "free" && (
-    <button onClick={() => setShowUpgrade(true)} style={{
-      background: "var(--orange)", border: "none", color: "white",
-      padding: "6px 14px", borderRadius: "8px", fontSize: "0.72rem",
-      cursor: "pointer", fontFamily: "Afacad Flux, sans-serif", fontWeight: 600,
-      transition: "all 0.2s"
-    }}>⬆ Upgrade</button>
-  )}
-  <AvatarButton session={session} onClick={() => setShowProfile(true)} />
-</div>
+            {session?.user?.email === ADMIN_EMAIL && (
+              <button onClick={() => setShowAdmin(true)} style={{
+                background: "var(--green)", border: "none", color: "white",
+                padding: "6px 12px", borderRadius: "8px", fontSize: "0.72rem",
+                cursor: "pointer", fontFamily: "Afacad Flux, sans-serif", fontWeight: 600
+              }}>⚙ Admin</button>
+            )}
+            {userTier === "free" && (
+              <button onClick={() => setShowUpgrade(true)} style={{
+                background: "var(--orange)", border: "none", color: "white",
+                padding: "6px 14px", borderRadius: "8px", fontSize: "0.72rem",
+                cursor: "pointer", fontFamily: "Afacad Flux, sans-serif", fontWeight: 600,
+                transition: "all 0.2s"
+              }}>⬆ Upgrade</button>
+            )}
+            <AvatarButton session={session} onClick={() => setShowProfile(true)} />
+          </div>
           <div className="header-accent">
             <span style={{ background: "#2E5339", flex: 1 }} />
             <span style={{ background: "#FF570A", flex: 1 }} />
@@ -821,7 +840,7 @@ export default function App() {
           <RecipeTab
             pantryIngredients={pantry}
             userTier={userTier}
-            onUpgrade={() => { setShowProfile(false); setTimeout(() => setShowUpgrade(true), 300); }}
+            onUpgrade={() => setShowUpgrade(true)}
           />
         )}
         {activeTab === "pantry" && (
@@ -841,11 +860,16 @@ export default function App() {
               <div className="upgrade-lock">
                 <div className="upgrade-lock-icon">🗓</div>
                 <h3>Meal Planner is a paid feature</h3>
-                <p>Upgrade to Commis Chef or higher to access the AI-powered meal planner.</p>
+                <p>Upgrade to Smart Cook or higher to access the AI-powered meal planner.</p>
                 <button className="upgrade-lock-btn" onClick={() => setShowUpgrade(true)}>View Plans</button>
               </div>
             )
-            : <MealPlanner session={session} pantryIngredients={pantry} userTier={userTier} onUpgrade={() => setShowUpgrade(true)} />
+            : <MealPlanner
+                session={session}
+                pantryIngredients={pantry}
+                userTier={userTier}
+                onUpgrade={() => setShowUpgrade(true)}
+              />
         )}
 
         {showOnboarding && (
@@ -857,13 +881,13 @@ export default function App() {
         )}
 
         {showProfile && (
-  <Profile
-    session={session}
-    onClose={() => setShowProfile(false)}
-    onSignOut={async () => { await supabase.auth.signOut(); setSession(null); setShowProfile(false); }}
-    onUpgrade={() => { setShowProfile(false); setTimeout(() => setShowUpgrade(true), 300); }}
-  />
-)}
+          <Profile
+            session={session}
+            onClose={() => setShowProfile(false)}
+            onSignOut={async () => { await supabase.auth.signOut(); setSession(null); setShowProfile(false); }}
+            onUpgrade={() => { setShowProfile(false); setTimeout(() => setShowUpgrade(true), 300); }}
+          />
+        )}
 
         {showUpgrade && (
           <UpgradeModal
