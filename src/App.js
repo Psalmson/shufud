@@ -1,3 +1,4 @@
+import Landing from "./Landing";
 import RecipeHistory from "./RecipeHistory";
 import { useState, useRef, useEffect } from "react";
 import { supabase } from "./supabaseClient";
