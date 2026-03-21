@@ -429,7 +429,7 @@ function RecipeTab({ pantryIngredients, userTier, onUpgrade }) {
                   <div style={{ marginTop: "16px" }}>
                     {userTier === "pro_chef" ? (
                       
-                        href={`https://www.youtube.com/results?search_query=${encodeURIComponent(`${recipe.name} Nigerian recipe how to cook`)}`}
+                        href={"https://www.youtube.com/results?search_query=" + encodeURIComponent(recipe.name + " Nigerian recipe how to cook")}
                         target="_blank"
                         rel="noreferrer"
                         style={{
