@@ -319,6 +319,24 @@ function RecipeTab({ pantryIngredients, userTier, onUpgrade }) {
       const parsed = JSON.parse(text.replace(/```json|```/g, "").trim());
       setRecipes(parsed.recipes || []);
       if (parsed.recipes?.length) setExpanded({ 0: true });
+      // Save to history
+if (parsed.recipes?.length) {
+  const { data: { session: s } } = await supabase.auth.getSession();
+  if (s) {
+    const historyEntries = parsed.recipes.map(r => ({
+      user_id: s.user.id,
+      recipe_name: r.name,
+      cuisine: r.cuisine || null,
+      description: r.description || null,
+      ingredients: r.ingredientsNeeded || [],
+      steps: r.steps || [],
+      time: r.time || null,
+      difficulty: r.difficulty || null,
+      servings: r.servings || null
+    }));
+    await supabase.from("recipe_history").insert(historyEntries);
+  }
+}
       if (data.usage_info?.remaining === 0) {
         setError("That was your last recipe suggestion for today. Come back tomorrow!");
       }
