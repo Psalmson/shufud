@@ -172,7 +172,9 @@ export default function Onboarding({ session, onComplete, onSkip }) {
       <div className="onboarding-overlay">
         <div className="onboarding-modal">
           <div className="onboarding-header">
-            <div className="onboarding-logo"><em>Shufud</em></div>
+            <div className="onboarding-logo">
+            <img src="/logo-dark.svg" alt="Shufud" style={{ height: "32px", width: "auto" }} />
+          </div>
             <h2>
               {step === 1 && "Welcome! Let's set up your pantry 🧺"}
               {step === 2 && "Here's what we found 🎉"}
