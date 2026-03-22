@@ -122,7 +122,9 @@ export default function Landing({ onGetStarted, onSignIn }) {
 
         {/* ── Nav ── */}
         <nav className="lp-nav">
-          <div className="lp-logo"><em>Shufud</em></div>
+          <div className="lp-logo">
+  <img src="/logo-light.svg" alt="Shufud" style={{ height: "36px", width: "auto" }} />
+</div>
           <div className="lp-nav-actions">
             <button className="lp-signin-btn" onClick={onSignIn}>Sign In</button>
             <button className="lp-nav-cta" onClick={onGetStarted}>Get Started Free</button>
@@ -325,7 +327,9 @@ export default function Landing({ onGetStarted, onSignIn }) {
 
         {/* ── Footer ── */}
         <footer className="lp-footer">
-          <div className="lp-footer-logo"><em>Shufud</em></div>
+          <div className="lp-footer-logo">
+  <img src="/logo-dark.svg" alt="Shufud" style={{ height: "28px", width: "auto" }} />
+</div>
           <div className="lp-footer-tagline">Tell me what you have · I'll tell you what to cook</div>
           <div className="lp-footer-copy">© {new Date().getFullYear()} Shufud. All rights reserved.</div>
         </footer>
