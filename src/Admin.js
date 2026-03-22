@@ -187,7 +187,9 @@ export default function Admin({ session, onBack }) {
       <div className="admin-page">
         <div className="admin-topbar">
           <div className="admin-topbar-title">
-            🍳 Shufud Admin <span className="admin-topbar-badge">Dashboard</span>
+            <img src="/logo-dark.svg" alt="Shufud" style={{ height: "24px", width: "auto" }} />
+            <span style={{ marginLeft: "8px" }}>Admin</span>
+            <span className="admin-topbar-badge">Dashboard</span>
           </div>
           <button className="admin-topbar-btn" onClick={onBack}>← Back to App</button>
         </div>
