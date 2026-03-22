@@ -828,7 +828,9 @@ export default function App() {
             <span style={{ background: "#FF570A", flex: 1 }} />
             <span style={{ background: "#05B2DC", flex: 1 }} />
           </div>
-          <h1><em>Shufud</em></h1>
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: "10px" }}>
+            <img src="/logo-light.svg" alt="Shufud" style={{ height: "48px", width: "auto" }} />
+          </div>
           <p className="header-sub">Tell me what you have · I'll tell you what to cook</p>
           <div className="cuisine-tags">
             {[["🍛 Jollof Rice","ct-1"],["🥘 Egusi Soup","ct-2"],["🌶 Pepper Soup","ct-3"],["🍌 Dodo","ct-4"],["🫕 Efo Riro","ct-5"]].map(([tag,cls]) => (
