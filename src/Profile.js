@@ -243,6 +243,9 @@ export default function Profile({ session, onClose, onSignOut, onUpgrade }) {
       <div className="profile-drawer">
         <div className="profile-header">
           <button className="profile-close" onClick={onClose}>✕</button>
+          <div style={{ position: "absolute", top: "16px", left: "50%", transform: "translateX(-50%)" }}>
+            <img src="/logo-dark.svg" alt="Shufud" style={{ height: "22px", width: "auto", opacity: 0.7 }} />
+          </div>
           <div className="profile-avatar-large" style={{ background: avatarColor }}>{initials}</div>
           <div className="profile-header-info">
             <div className="profile-header-name">{displayName || session?.user?.email?.split("@")[0]}</div>
