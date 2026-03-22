@@ -20,7 +20,7 @@ const style = `
   }
   body { font-family: 'Afacad Flux', sans-serif; font-size: 18px; background: var(--bg); color: var(--charcoal); min-height: 100vh; }
 
-  .auth-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; background: var(--bg); }
+  .auth-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; background: var(--bg); position: relative; }
   .auth-box { background: var(--warm-white); border: 1.5px solid var(--border); border-radius: 24px; padding: 40px; width: 100%; max-width: 420px; box-shadow: var(--card-shadow); }
   .auth-header { text-align: center; margin-bottom: 32px; }
   .auth-logo { font-family: 'Spectral', serif; font-size: 2.8rem; color: var(--green); line-height: 1; letter-spacing: -1px; }
@@ -55,6 +55,8 @@ const style = `
   .auth-forgot { text-align: right; margin-top: -8px; margin-bottom: 16px; }
   .auth-forgot button { background: none; border: none; color: var(--muted); cursor: pointer; font-family: 'Afacad Flux', sans-serif; font-size: 0.82rem; transition: color 0.15s; }
   .auth-forgot button:hover { color: var(--teal); }
+  .auth-back-btn { position: fixed; top: 20px; left: 20px; background: white; border: 1.5px solid #d4e2d8; border-radius: 10px; cursor: pointer; color: #4a6655; font-size: 0.88rem; font-family: 'Afacad Flux', sans-serif; padding: 8px 16px; display: flex; align-items: center; gap: 6px; font-weight: 500; transition: all 0.2s; box-shadow: 0 2px 8px rgba(46,83,57,0.08); z-index: 10; }
+  .auth-back-btn:hover { border-color: #2E5339; color: #2E5339; }
   .verify-icon { font-size: 3rem; margin-bottom: 16px; }
   .password-hint { font-size: 0.78rem; color: var(--muted); margin-top: 6px; }
   .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
@@ -120,24 +122,15 @@ function ForgotPassword({ onBack }) {
     <>
       <style>{style}</style>
       <div className="auth-page">
-        {onBack && (
-          <button onClick={onBack} style={{
-            position: "fixed", top: "20px", left: "20px",
-            background: "white", border: "1.5px solid #d4e2d8",
-            borderRadius: "10px", cursor: "pointer",
-            color: "#4a6655", fontSize: "0.88rem",
-            fontFamily: "Afacad Flux, sans-serif",
-            padding: "8px 16px",
-            display: "flex", alignItems: "center", gap: "6px",
-            fontWeight: 500, transition: "all 0.2s",
-            boxShadow: "0 2px 8px rgba(46,83,57,0.08)"
-          }}>
-            ← Back
-          </button>
-        )}
         <div className="auth-box">
           <div className="auth-header">
             <div className="auth-logo"><em>Shufud</em></div>
+            <div className="auth-accent">
+              <span style={{ background: "#2E5339" }} />
+              <span style={{ background: "#FF570A" }} />
+              <span style={{ background: "#05B2DC" }} />
+            </div>
+          </div>
 
           {success ? (
             <div style={{ textAlign: "center" }}>
@@ -273,6 +266,9 @@ export default function Auth({ onVerify, onBack }) {
     <>
       <style>{style}</style>
       <div className="auth-page">
+        {onBack && (
+          <button className="auth-back-btn" onClick={onBack}>← Back</button>
+        )}
         <div className="auth-box">
           <div className="auth-header">
             <div className="auth-logo"><em>Shufud</em></div>
