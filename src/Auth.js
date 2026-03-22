@@ -120,15 +120,24 @@ function ForgotPassword({ onBack }) {
     <>
       <style>{style}</style>
       <div className="auth-page">
+        {onBack && (
+          <button onClick={onBack} style={{
+            position: "fixed", top: "20px", left: "20px",
+            background: "white", border: "1.5px solid #d4e2d8",
+            borderRadius: "10px", cursor: "pointer",
+            color: "#4a6655", fontSize: "0.88rem",
+            fontFamily: "Afacad Flux, sans-serif",
+            padding: "8px 16px",
+            display: "flex", alignItems: "center", gap: "6px",
+            fontWeight: 500, transition: "all 0.2s",
+            boxShadow: "0 2px 8px rgba(46,83,57,0.08)"
+          }}>
+            ← Back
+          </button>
+        )}
         <div className="auth-box">
           <div className="auth-header">
             <div className="auth-logo"><em>Shufud</em></div>
-            <div className="auth-accent">
-              <span style={{ background: "#2E5339" }} />
-              <span style={{ background: "#FF570A" }} />
-              <span style={{ background: "#05B2DC" }} />
-            </div>
-          </div>
 
           {success ? (
             <div style={{ textAlign: "center" }}>
