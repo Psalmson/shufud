@@ -797,7 +797,7 @@ export default function App() {
       onSignIn={() => setShowLanding(false)}
     />
   );
-  if (!session) return <Auth onVerify={(email) => setVerifyEmail(email)} />;
+  if (!session) return <Auth onVerify={(email) => setVerifyEmail(email)} onBack={() => setShowLanding(true)} />;
   if (showAdmin) return <Admin session={session} onBack={() => setShowAdmin(false)} />;
 
   return (
