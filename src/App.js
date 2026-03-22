@@ -1,5 +1,3 @@
-import Landing from "./Landing";
-import RecipeHistory from "./RecipeHistory";
 import { useState, useRef, useEffect } from "react";
 import { supabase } from "./supabaseClient";
 import Auth, { VerifyEmail } from "./Auth";
@@ -8,6 +6,8 @@ import MealPlanner from "./MealPlanner";
 import Admin from "./Admin";
 import UpgradeModal from "./UpgradeModal";
 import Onboarding from "./Onboarding";
+import RecipeHistory from "./RecipeHistory";
+import Landing from "./Landing";
 
 const ADMIN_EMAIL = "psalmsonlarinre@gmail.com";
 
@@ -321,45 +321,27 @@ function RecipeTab({ pantryIngredients, userTier, onUpgrade }) {
       const parsed = JSON.parse(text.replace(/```json|```/g, "").trim());
       setRecipes(parsed.recipes || []);
       if (parsed.recipes?.length) {
-  setExpanded({ 0: true });
-  try {
-    const { data: { session: s } } = await supabase.auth.getSession();
-    if (s) {
-      const historyEntries = parsed.recipes.map(r => ({
-        user_id: s.user.id,
-        recipe_name: r.name,
-        cuisine: r.cuisine || null,
-        description: r.description || null,
-        ingredients: r.ingredientsNeeded || [],
-        steps: r.steps || [],
-        time: r.time || null,
-        difficulty: r.difficulty || null,
-        servings: r.servings || null
-      }));
-      await supabase.from("recipe_history").insert(historyEntries);
-    }
-  } catch (err) {
-    console.log("History save error", err);
-  }
-}
-      // Save to history
-if (parsed.recipes?.length) {
-  const { data: { session: s } } = await supabase.auth.getSession();
-  if (s) {
-    const historyEntries = parsed.recipes.map(r => ({
-      user_id: s.user.id,
-      recipe_name: r.name,
-      cuisine: r.cuisine || null,
-      description: r.description || null,
-      ingredients: r.ingredientsNeeded || [],
-      steps: r.steps || [],
-      time: r.time || null,
-      difficulty: r.difficulty || null,
-      servings: r.servings || null
-    }));
-    await supabase.from("recipe_history").insert(historyEntries);
-  }
-}
+        setExpanded({ 0: true });
+        try {
+          const { data: { session: s } } = await supabase.auth.getSession();
+          if (s) {
+            const historyEntries = parsed.recipes.map(r => ({
+              user_id: s.user.id,
+              recipe_name: r.name,
+              cuisine: r.cuisine || null,
+              description: r.description || null,
+              ingredients: r.ingredientsNeeded || [],
+              steps: r.steps || [],
+              time: r.time || null,
+              difficulty: r.difficulty || null,
+              servings: r.servings || null
+            }));
+            await supabase.from("recipe_history").insert(historyEntries);
+          }
+        } catch (err) {
+          console.log("History save error", err);
+        }
+      }
       if (data.usage_info?.remaining === 0) {
         setError("That was your last recipe suggestion for today. Come back tomorrow!");
       }
@@ -491,7 +473,9 @@ if (parsed.recipes?.length) {
           <p>Add ingredients and hit <strong>Suggest Recipes</strong>{allPantryItems.length > 0 ? ", or cook from your pantry!" : ""}</p>
         </div>
       )}
+
       <RecipeHistory userTier={userTier} onUpgrade={onUpgrade} />
+
       <div className="telegram-note" style={{ marginTop: "40px" }}>
         <span className="telegram-icon">🤖</span>
         <div>
@@ -663,6 +647,7 @@ export default function App() {
   const [session, setSession] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [verifyEmail, setVerifyEmail] = useState(null);
+  const [showLanding, setShowLanding] = useState(true);
   const [showProfile, setShowProfile] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
@@ -681,6 +666,7 @@ export default function App() {
       sessionRef.current = session;
       setAuthLoading(false);
       if (session) {
+        setShowLanding(false);
         loadPantry(session.user.id);
         checkTrialAndTier(session);
       }
@@ -689,6 +675,7 @@ export default function App() {
       setSession(session);
       sessionRef.current = session;
       if (session) {
+        setShowLanding(false);
         loadPantry(session.user.id);
         checkTrialAndTier(session);
       }
@@ -804,6 +791,12 @@ export default function App() {
   );
 
   if (verifyEmail) return <VerifyEmail email={verifyEmail} onBack={() => setVerifyEmail(null)} />;
+  if (!session && showLanding) return (
+    <Landing
+      onGetStarted={() => setShowLanding(false)}
+      onSignIn={() => setShowLanding(false)}
+    />
+  );
   if (!session) return <Auth onVerify={(email) => setVerifyEmail(email)} />;
   if (showAdmin) return <Admin session={session} onBack={() => setShowAdmin(false)} />;
 
@@ -901,7 +894,7 @@ export default function App() {
           <Profile
             session={session}
             onClose={() => setShowProfile(false)}
-            onSignOut={async () => { await supabase.auth.signOut(); setSession(null); setShowProfile(false); }}
+            onSignOut={async () => { await supabase.auth.signOut(); setSession(null); setShowProfile(false); setShowLanding(true); }}
             onUpgrade={() => { setShowProfile(false); setTimeout(() => setShowUpgrade(true), 300); }}
           />
         )}
