@@ -216,7 +216,7 @@ export function VerifyEmail({ email, onBack }) {
   );
 }
 
-export default function Auth({ onVerify }) {
+export default function Auth({ onVerify, onBack }) {
   const [mode, setMode] = useState("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
