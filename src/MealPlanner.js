@@ -364,17 +364,23 @@ export default function MealPlanner({ session, pantryIngredients, userTier, onUp
   };
 
   const downloadPDF = () => {
-  setDownloading(true);
-  const printDiv = document.getElementById("shufud-meal-plan-print");
-  if (printDiv) printDiv.style.display = "block";
-  setTimeout(() => {
-    window.print();
+    setDownloading(true);
+    const printDiv = document.getElementById("shufud-meal-plan-print");
+    if (printDiv) printDiv.style.display = "block";
+
+    // Set document title to control default filename
+    const originalTitle = document.title;
+    document.title = `MealPlan_${formatWeekLabel(weekStart).replace(/\s/g, "").replace(/–/g, "-")}`;
+
     setTimeout(() => {
-      if (printDiv) printDiv.style.display = "none";
-      setDownloading(false);
-    }, 1000);
-  }, 300);
-};
+      window.print();
+      setTimeout(() => {
+        document.title = originalTitle;
+        if (printDiv) printDiv.style.display = "none";
+        setDownloading(false);
+      }, 1000);
+    }, 300);
+  };
 
   const hasPlan = DAYS.some(day => MEAL_SLOTS.some(slot => getCellValue(day, slot)));
 
