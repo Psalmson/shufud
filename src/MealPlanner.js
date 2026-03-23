@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "./supabaseClient";
 
@@ -144,26 +145,6 @@ const plannerStyle = `
   .recipe-modal-yt:hover { background: #cc0000; transform: translateY(-1px); }
   .recipe-modal-yt-locked { display: inline-flex; align-items: center; gap: 8px; background: var(--bg); color: var(--muted); padding: 8px 16px; border-radius: 8px; font-size: 0.82rem; font-weight: 600; border: 1.5px solid var(--border); cursor: pointer; transition: all 0.2s; font-family: 'Afacad Flux', sans-serif; margin-top: 12px; }
   .recipe-modal-yt-locked:hover { border-color: var(--orange); color: var(--orange); }
-
-  /* ── Print / PDF styles ── */
-  @media print {
-    @page { size: A4 landscape; margin: 15mm; }
-    body * { visibility: hidden !important; }
-    #shufud-meal-plan-print, #shufud-meal-plan-print * { visibility: visible !important; }
-    #shufud-meal-plan-print { position: fixed; inset: 0; background: white; z-index: 9999; padding: 0; }
-    .print-header { text-align: center; margin-bottom: 16px; }
-    .print-title { font-family: 'Spectral', serif; font-size: 1.6rem; color: #2E5339; }
-    .print-title em { color: #FF570A; font-style: italic; }
-    .print-week { font-size: 0.82rem; color: #4a6655; margin-top: 4px; }
-    .print-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-    .print-table th { background: #2E5339; color: white; padding: 8px 6px; font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; text-align: center; word-wrap: break-word; }
-    .print-table th.slot-col { background: #f0f5f1; color: #4a6655; text-align: left; width: 80px; }
-    .print-table td { border: 1px solid #d4e2d8; padding: 6px 8px; font-size: 0.75rem; vertical-align: top; word-wrap: break-word; }
-    .print-table td.slot-label { background: #f0f5f1; font-weight: 600; color: #2E5339; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; width: 80px; }
-    .print-table td.filled-cell { background: #edfaff; }
-    .print-table td.empty-cell { color: #c5d9cd; font-style: italic; font-size: 0.72rem; }
-    .print-footer { margin-top: 12px; text-align: center; font-size: 0.68rem; color: #9ab5a2; }
-  }
 `;
 
 const SLOT_EMOJIS = { Breakfast: "🌅", Lunch: "☀️", Dinner: "🌙", Snack: "🍎" };
@@ -363,23 +344,121 @@ export default function MealPlanner({ session, pantryIngredients, userTier, onUp
     savePlan({});
   };
 
-  const downloadPDF = () => {
+  const downloadPDF = async () => {
     setDownloading(true);
-    const printDiv = document.getElementById("shufud-meal-plan-print");
-    if (printDiv) printDiv.style.display = "block";
+    try {
+      // Load jsPDF from CDN
+      const script = document.createElement("script");
+      script.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+      document.head.appendChild(script);
+      await new Promise(resolve => { script.onload = resolve; });
 
-    // Set document title to control default filename
-    const originalTitle = document.title;
-    document.title = `MealPlan_${formatWeekLabel(weekStart).replace(/\s/g, "").replace(/–/g, "-")}`;
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
 
-    setTimeout(() => {
-      window.print();
-      setTimeout(() => {
-        document.title = originalTitle;
-        if (printDiv) printDiv.style.display = "none";
-        setDownloading(false);
-      }, 1000);
-    }, 300);
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 14;
+      const colWidth = (pageWidth - margin * 2 - 30) / 7;
+      const rowHeight = 28;
+      const headerHeight = 10;
+
+      // ── Header ──────────────────────────────────────────────────────────
+      doc.setFont("helvetica", "bolditalic");
+      doc.setFontSize(22);
+      doc.setTextColor(255, 87, 10);
+      doc.text("Shufud", pageWidth / 2, 16, { align: "center" });
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(74, 102, 85);
+      doc.text(`Meal Plan · ${formatWeekLabel(weekStart)}`, pageWidth / 2, 22, { align: "center" });
+
+      // ── Table header row ─────────────────────────────────────────────────
+      const tableTop = 28;
+      const slotColWidth = 30;
+
+      // Corner cell
+      doc.setFillColor(46, 83, 57);
+      doc.rect(margin, tableTop, slotColWidth, headerHeight, "F");
+
+      // Day headers
+      DAYS.forEach((day, i) => {
+        const x = margin + slotColWidth + i * colWidth;
+        const dayDate = getDayDate(weekStart, i);
+        const todayCol = isToday(weekStart, i);
+
+        doc.setFillColor(todayCol ? 255 : 46, todayCol ? 87 : 83, todayCol ? 10 : 57);
+        doc.rect(x, tableTop, colWidth, headerHeight, "F");
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(7);
+        doc.setTextColor(255, 255, 255);
+        doc.text(`${day} ${dayDate.getDate()}`, x + colWidth / 2, tableTop + 6.5, { align: "center" });
+      });
+
+      // ── Meal slot rows ───────────────────────────────────────────────────
+      MEAL_SLOTS.forEach((slot, rowIdx) => {
+        const y = tableTop + headerHeight + rowIdx * rowHeight;
+        const isEven = rowIdx % 2 === 0;
+
+        // Slot label cell
+        doc.setFillColor(isEven ? 240 : 248, isEven ? 245 : 250, isEven ? 241 : 248);
+        doc.rect(margin, y, slotColWidth, rowHeight, "F");
+        doc.setDrawColor(212, 226, 216);
+        doc.rect(margin, y, slotColWidth, rowHeight, "S");
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(6.5);
+        doc.setTextColor(46, 83, 57);
+        doc.text(`${SLOT_EMOJIS[slot]} ${slot.toUpperCase()}`, margin + 3, y + rowHeight / 2 + 2);
+
+        // Day cells
+        DAYS.forEach((day, colIdx) => {
+          const x = margin + slotColWidth + colIdx * colWidth;
+          const val = getCellValue(day, slot);
+          const todayCol = isToday(weekStart, colIdx);
+
+          // Cell background
+          if (val) {
+            doc.setFillColor(todayCol ? 255 : 237, todayCol ? 240 : 250, todayCol ? 230 : 255);
+          } else {
+            doc.setFillColor(isEven ? 255 : 250, isEven ? 255 : 250, isEven ? 255 : 250);
+          }
+          doc.rect(x, y, colWidth, rowHeight, "F");
+          doc.setDrawColor(212, 226, 216);
+          doc.rect(x, y, colWidth, rowHeight, "S");
+
+          if (val) {
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(7);
+            doc.setTextColor(15, 31, 20);
+            const lines = doc.splitTextToSize(val, colWidth - 4);
+            doc.text(lines.slice(0, 3), x + 3, y + 7);
+          } else {
+            doc.setFont("helvetica", "italic");
+            doc.setFontSize(6);
+            doc.setTextColor(197, 217, 205);
+            doc.text("—", x + colWidth / 2, y + rowHeight / 2 + 2, { align: "center" });
+          }
+        });
+      });
+
+      // ── Footer ───────────────────────────────────────────────────────────
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7);
+      doc.setTextColor(154, 181, 162);
+      doc.text("Generated by Shufud · shufud.vercel.app", pageWidth / 2, pageHeight - 6, { align: "center" });
+
+      // ── Save ─────────────────────────────────────────────────────────────
+      const filename = `MealPlan_${formatWeekLabel(weekStart).replace(/\s/g, "").replace(/–/g, "-")}.pdf`;
+      doc.save(filename);
+
+    } catch (err) {
+      console.error("PDF generation error:", err);
+    } finally {
+      setDownloading(false);
+    }
   };
 
   const hasPlan = DAYS.some(day => MEAL_SLOTS.some(slot => getCellValue(day, slot)));
@@ -387,41 +466,7 @@ export default function MealPlanner({ session, pantryIngredients, userTier, onUp
   return (
     <>
       <style>{plannerStyle}</style>
-
-      {/* ── Hidden print layout ── */}
-      <div id="shufud-meal-plan-print" style={{ display: "none", fontFamily: "Arial, sans-serif" }} title={`MealPlan_${formatWeekLabel(weekStart).replace(/\s/g, "").replace(/–/g, "-")}`}>
-        <div className="print-header">
-          <div className="print-title"><em>Shufud</em></div>
-          <div className="print-week">Meal Plan · {formatWeekLabel(weekStart)}</div>
-        </div>
-        <table className="print-table">
-          <thead>
-            <tr>
-              <th className="slot-col">Meal</th>
-              {DAYS.map((day, i) => (
-                <th key={day}>{day} {getDayDate(weekStart, i).getDate()}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {MEAL_SLOTS.map(slot => (
-              <tr key={slot}>
-                <td className="slot-label">{SLOT_EMOJIS[slot]} {slot}</td>
-                {DAYS.map(day => {
-                  const val = getCellValue(day, slot);
-                  return (
-                    <td key={day} className={val ? "filled-cell" : "empty-cell"}>
-                      {val || "—"}
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <div className="print-footer">Generated by Shufud · shufud.vercel.app</div>
-      </div>
-
+    
       <div className="planner-wrap">
         {/* ── Top bar ── */}
         <div className="planner-topbar">
