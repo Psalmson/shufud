@@ -124,7 +124,7 @@ function ForgotPassword({ onBack }) {
       <div className="auth-page">
         <div className="auth-box">
           <div className="auth-header">
-            <div className="auth-logo"><em>Shufud</em></div>
+            <div className="auth-logo">   <img src="/logo-light.svg" alt="Shufud" style={{ height: "48px", width: "auto" }} /> </div>
             <div className="auth-accent">
               <span style={{ background: "#2E5339" }} />
               <span style={{ background: "#FF570A" }} />
@@ -192,7 +192,7 @@ export function VerifyEmail({ email, onBack }) {
       <div className="auth-page">
         <div className="auth-box">
           <div className="auth-header">
-            <div className="auth-logo"><em>Shufud</em></div>
+            <div className="auth-logo">   <img src="/logo-light.svg" alt="Shufud" style={{ height: "48px", width: "auto" }} /> </div>
             <div className="auth-accent">
               <span style={{ background: "#2E5339" }} />
               <span style={{ background: "#FF570A" }} />
@@ -271,7 +271,7 @@ export default function Auth({ onVerify, onBack }) {
         )}
         <div className="auth-box">
           <div className="auth-header">
-            <div className="auth-logo"><em>Shufud</em></div>
+            <div className="auth-logo">   <img src="/logo-light.svg" alt="Shufud" style={{ height: "48px", width: "auto" }} /> </div>
             <div className="auth-accent">
               <span style={{ background: "#2E5339" }} />
               <span style={{ background: "#FF570A" }} />
