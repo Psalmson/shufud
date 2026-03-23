@@ -147,21 +147,22 @@ const plannerStyle = `
 
   /* ── Print / PDF styles ── */
   @media print {
+    @page { size: A4 landscape; margin: 15mm; }
     body * { visibility: hidden !important; }
     #shufud-meal-plan-print, #shufud-meal-plan-print * { visibility: visible !important; }
-    #shufud-meal-plan-print { position: fixed; inset: 0; background: white; z-index: 9999; padding: 32px; }
-    .print-header { text-align: center; margin-bottom: 24px; }
-    .print-title { font-family: 'Spectral', serif; font-size: 2rem; color: #2E5339; }
+    #shufud-meal-plan-print { position: fixed; inset: 0; background: white; z-index: 9999; padding: 0; }
+    .print-header { text-align: center; margin-bottom: 16px; }
+    .print-title { font-family: 'Spectral', serif; font-size: 1.6rem; color: #2E5339; }
     .print-title em { color: #FF570A; font-style: italic; }
-    .print-week { font-size: 0.9rem; color: #4a6655; margin-top: 6px; }
-    .print-table { width: 100%; border-collapse: collapse; }
-    .print-table th { background: #2E5339; color: white; padding: 10px 12px; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; text-align: center; }
-    .print-table th.slot-col { background: #f0f5f1; color: #4a6655; text-align: left; }
-    .print-table td { border: 1px solid #d4e2d8; padding: 10px 12px; font-size: 0.82rem; vertical-align: top; }
-    .print-table td.slot-label { background: #f0f5f1; font-weight: 600; color: #2E5339; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; }
+    .print-week { font-size: 0.82rem; color: #4a6655; margin-top: 4px; }
+    .print-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    .print-table th { background: #2E5339; color: white; padding: 8px 6px; font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; text-align: center; word-wrap: break-word; }
+    .print-table th.slot-col { background: #f0f5f1; color: #4a6655; text-align: left; width: 80px; }
+    .print-table td { border: 1px solid #d4e2d8; padding: 6px 8px; font-size: 0.75rem; vertical-align: top; word-wrap: break-word; }
+    .print-table td.slot-label { background: #f0f5f1; font-weight: 600; color: #2E5339; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; width: 80px; }
     .print-table td.filled-cell { background: #edfaff; }
-    .print-table td.empty-cell { color: #c5d9cd; font-style: italic; font-size: 0.75rem; }
-    .print-footer { margin-top: 20px; text-align: center; font-size: 0.72rem; color: #9ab5a2; }
+    .print-table td.empty-cell { color: #c5d9cd; font-style: italic; font-size: 0.72rem; }
+    .print-footer { margin-top: 12px; text-align: center; font-size: 0.68rem; color: #9ab5a2; }
   }
 `;
 
