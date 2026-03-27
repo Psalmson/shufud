@@ -274,15 +274,29 @@ export default function Profile({ session, onClose, onSignOut, onUpgrade }) {
           {error && <div className="profile-error">⚠ {error}</div>}
 
           {tier !== "free" && profile?.tier_expires_at && (
-            <div className={`profile-sub-info ${isExpiringSoon ? "expiring" : ""}`}>
-              <p>
-                {isExpiringSoon
-                  ? <><strong>⚠ Subscription expiring soon!</strong> Renew to keep your {tierLabel} features.</>
-                  : <>Your <strong>{tierLabel}</strong> subscription is active until <strong>{new Date(profile.tier_expires_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</strong>.</>
-                }
-              </p>
-            </div>
-          )}
+  <div className={`profile-sub-info ${isExpiringSoon ? "expiring" : ""}`}>
+    <p>
+      {isExpiringSoon
+        ? <><strong>⚠ Subscription expiring soon!</strong> Renew to keep your {tierLabel} features.</>
+        : <>Your <strong>{tierLabel}</strong> subscription is active until <strong>{new Date(profile.tier_expires_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</strong>.</>
+      }
+    </p>
+    {isExpiringSoon && (
+      <button
+        onClick={onUpgrade}
+        style={{
+          marginTop: "10px", width: "100%", padding: "10px",
+          background: "#FF570A", color: "white", border: "none",
+          borderRadius: "8px", fontFamily: "Afacad Flux, sans-serif",
+          fontSize: "0.88rem", fontWeight: 600, cursor: "pointer",
+          transition: "all 0.2s"
+        }}
+      >
+        🔄 Renew Subscription
+      </button>
+    )}
+  </div>
+)}
 
           <div className="profile-stats">
             <div className="stat-card">
