@@ -40,8 +40,6 @@ const style = `
   .header { text-align: center; padding: 48px 0 32px; position: relative; }
   .header-accent { display: flex; justify-content: center; gap: 0; margin-bottom: 24px; border-radius: 4px; overflow: hidden; width: 120px; margin-left: auto; margin-right: auto; height: 5px; }
   .header-accent span { display: block; height: 5px; }
-  .header h1 { font-family: 'Spectral', serif; font-size: clamp(2.8rem, 6vw, 4rem); color: var(--green); line-height: 1; letter-spacing: -1px; }
-  .header h1 em { color: var(--orange); font-style: italic; }
   .header-sub { margin-top: 10px; color: var(--muted); font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; }
   .cuisine-tags { display: flex; justify-content: center; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
   .cuisine-tag { font-size: 0.68rem; padding: 5px 12px; border-radius: 20px; letter-spacing: 0.04em; font-weight: 500; }
@@ -79,7 +77,7 @@ const style = `
   .btn-icon { padding: 7px 12px; font-size: 0.78rem; border-radius: 8px; }
   .btn-full { width: 100%; padding: 16px; font-family: 'Spectral', serif; font-size: 1.05rem; justify-content: center; border-radius: 12px; letter-spacing: 0.02em; }
   .btn-full:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
-  .btn-pantry { background: var(--green); color: white; margin-top: 12px; }
+  .btn-pantry { background: var(--green); color: white; }
   .btn-pantry:hover:not(:disabled) { background: var(--green-light); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(46,83,57,0.3); }
 
   .tags { display: flex; flex-wrap: wrap; gap: 8px; min-height: 28px; }
@@ -133,30 +131,38 @@ const style = `
   .telegram-icon { font-size: 1.8rem; flex-shrink: 0; }
   .telegram-note h3 { font-family: 'Spectral', serif; color: var(--green); font-size: 1rem; margin-bottom: 4px; }
   .telegram-note p { font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
-  .telegram-note code { background: white; padding: 1px 6px; border-radius: 4px; font-size: 0.85em; color: var(--orange); border: 1px solid var(--border); }
 
   .pantry-top-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
   .pantry-title { font-family: 'Spectral', serif; font-size: 1.5rem; color: var(--green); }
   .pantry-title span { font-family: 'Afacad Flux', sans-serif; font-size: 0.78rem; color: var(--muted); margin-left: 10px; }
   .pantry-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-  .pantry-add-row { display: flex; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
-  .category-select { padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--bg); font-family: 'Afacad Flux', sans-serif; font-size: 0.92rem; color: var(--charcoal); outline: none; cursor: pointer; min-width: 170px; transition: border-color 0.2s; }
-  .category-select:focus { border-color: var(--teal); }
 
-  .pantry-categories { display: flex; flex-direction: column; gap: 16px; margin-top: 24px; }
-  .category-block { background: var(--warm-white); border: 1.5px solid var(--border); border-radius: 16px; overflow: hidden; box-shadow: var(--card-shadow); transition: box-shadow 0.2s; }
-  .category-block:hover { box-shadow: 0 6px 24px rgba(46,83,57,0.12); }
-  .category-heading { padding: 12px 18px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1.5px solid var(--border); }
-  .category-heading-left { display: flex; align-items: center; gap: 10px; }
-  .category-color-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-  .category-name-display { font-size: 0.82rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--charcoal); font-weight: 600; }
+  .acc-item { background: var(--warm-white); border: 1.5px solid var(--border); border-radius: 14px; margin-bottom: 10px; overflow: hidden; transition: box-shadow 0.2s; }
+  .acc-item:hover { box-shadow: 0 4px 16px rgba(46,83,57,0.08); }
+  .acc-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; cursor: pointer; user-select: none; transition: background 0.15s; }
+  .acc-header:hover { background: var(--green-pale); }
+  .acc-header-left { display: flex; align-items: center; gap: 10px; }
+  .acc-header-name { font-size: 0.88rem; font-weight: 600; color: var(--charcoal); letter-spacing: 0.04em; }
+  .acc-header-count { font-size: 0.7rem; background: var(--green-pale); border: 1px solid var(--border); border-radius: 10px; padding: 2px 8px; color: var(--muted); }
+  .acc-header-right { display: flex; align-items: center; gap: 8px; }
+  .acc-arrow { font-size: 1rem; color: var(--muted); transition: transform 0.2s; display: inline-block; }
+  .acc-arrow.open { transform: rotate(180deg); color: var(--orange); }
+  .acc-body { border-top: 1.5px solid var(--border); padding: 14px 18px; }
+  .acc-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; min-height: 28px; }
+  .acc-chip { background: var(--green-pale); border: 1.5px solid var(--border); border-radius: 20px; padding: 4px 10px 4px 12px; font-size: 0.82rem; color: var(--charcoal); display: flex; align-items: center; gap: 6px; transition: border-color 0.15s; }
+  .acc-chip:hover { border-color: var(--teal); }
+  .acc-chip-x { cursor: pointer; color: var(--muted); font-size: 1rem; line-height: 1; transition: color 0.15s; }
+  .acc-chip-x:hover { color: var(--orange); }
+  .acc-empty { font-size: 0.82rem; color: #9ab5a2; font-style: italic; }
+  .acc-add-row { display: flex; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+  .acc-add-input { flex: 1; padding: 8px 12px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--bg); font-family: 'Afacad Flux', sans-serif; font-size: 0.88rem; color: var(--charcoal); outline: none; transition: border-color 0.2s; }
+  .acc-add-input:focus { border-color: var(--teal); }
+  .acc-add-btn { padding: 8px 14px; background: var(--orange); color: white; border: none; border-radius: 8px; font-family: 'Afacad Flux', sans-serif; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+  .acc-add-btn:hover { background: var(--orange-light); }
+  .acc-cat-btn { font-size: 0.72rem; color: var(--muted); background: none; border: 1px solid var(--border); border-radius: 6px; padding: 3px 8px; cursor: pointer; font-family: 'Afacad Flux', sans-serif; transition: all 0.15s; }
+  .acc-cat-btn:hover { border-color: var(--teal); color: var(--teal); }
+  .acc-cat-btn.danger:hover { border-color: var(--orange); color: var(--orange); }
   .category-name-input { font-size: 0.82rem; letter-spacing: 0.06em; color: var(--charcoal); font-weight: 600; border: 1.5px solid var(--teal); border-radius: 6px; padding: 3px 10px; background: var(--bg); font-family: 'Afacad Flux', sans-serif; outline: none; width: 160px; }
-  .category-count { font-size: 0.7rem; color: var(--muted); background: var(--green-pale); border: 1px solid var(--border); padding: 2px 8px; border-radius: 10px; }
-  .category-heading-right { display: flex; align-items: center; gap: 8px; }
-  .category-items { padding: 14px 18px; display: flex; flex-wrap: wrap; gap: 8px; min-height: 52px; }
-  .category-empty { color: #9ab5a2; font-size: 0.82rem; font-style: italic; }
-  .pantry-tag { background: var(--green-pale); border: 1.5px solid var(--border); border-radius: 20px; padding: 5px 12px 5px 14px; font-size: 0.85rem; color: var(--charcoal); display: flex; align-items: center; gap: 8px; animation: tagIn 0.2s ease; transition: border-color 0.15s; }
-  .pantry-tag:hover { border-color: var(--teal); }
 
   .pantry-cook-section { margin-top: 24px; background: linear-gradient(135deg, var(--teal-pale), var(--green-pale)); border: 1.5px solid var(--teal); border-radius: 16px; padding: 22px 24px; }
   .pantry-cook-section h3 { font-family: 'Spectral', serif; color: var(--green); font-size: 1.1rem; margin-bottom: 8px; }
@@ -389,24 +395,25 @@ function RecipeTab({ pantryIngredients, userTier, onUpgrade }) {
         </select>
       </div>
 
-      <button className="btn btn-primary btn-full" onClick={() => fetchRecipes(ingredients)} disabled={loading || !ingredients.length}>
-        {loading ? <><div className="spinner" /> Finding recipes…</> : "✦ Suggest Recipes"}
-      </button>
-
-      {allPantryItems.length > 0 && (
-        userTier === "free" ? (
-          <div className="tooltip-wrap">
-            <div className="tooltip-box">Upgrade to cook from your pantry</div>
-            <button className="btn btn-full btn-pantry" style={{ opacity: 0.6, cursor: "not-allowed" }} onClick={onUpgrade}>
-              🧺 Cook from My Pantry ({allPantryItems.length} items) 🔒
+      <div style={{ display: "grid", gridTemplateColumns: allPantryItems.length > 0 ? "1fr 1.4fr" : "1fr", gap: "10px" }}>
+        <button className="btn btn-primary btn-full" onClick={() => fetchRecipes(ingredients)} disabled={loading || !ingredients.length}>
+          {loading ? <><div className="spinner" /> Finding…</> : "✦ Suggest Recipes"}
+        </button>
+        {allPantryItems.length > 0 && (
+          userTier === "free" ? (
+            <div className="tooltip-wrap">
+              <div className="tooltip-box">Upgrade to cook from your pantry</div>
+              <button className="btn btn-full btn-pantry" style={{ opacity: 0.6, cursor: "not-allowed", margin: 0 }} onClick={onUpgrade}>
+                🧺 Cook from Pantry 🔒
+              </button>
+            </div>
+          ) : (
+            <button className="btn btn-full btn-pantry" style={{ margin: 0 }} onClick={() => fetchRecipes(allPantryItems)} disabled={loading}>
+              {loading ? <><div className="spinner" />Finding…</> : `🧺 Cook from Pantry (${allPantryItems.length})`}
             </button>
-          </div>
-        ) : (
-          <button className="btn btn-full btn-pantry" onClick={() => fetchRecipes(allPantryItems)} disabled={loading}>
-            {loading ? <><div className="spinner" />Finding…</> : `🧺 Cook from My Pantry (${allPantryItems.length} items)`}
-          </button>
-        )
-      )}
+          )
+        )}
+      </div>
 
       {error && <div className="error-box">⚠ {error}</div>}
 
@@ -488,23 +495,24 @@ function RecipeTab({ pantryIngredients, userTier, onUpgrade }) {
 }
 
 function PantryTab({ pantry, setPantry, categories, setCategories, pantryStatus, loading, onResetup }) {
-  const [input, setInput] = useState("");
-  const [selectedCat, setSelectedCat] = useState("proteins");
+  const [openCats, setOpenCats] = useState({ proteins: true });
+  const [addInputs, setAddInputs] = useState({});
   const [editingCat, setEditingCat] = useState(null);
   const [editLabel, setEditLabel] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
-  const inputRef = useRef(null);
   const totalItems = Object.values(pantry).flat().length;
 
-  const addItem = () => {
-    const val = input.trim().toLowerCase();
+  const toggleCat = (key) => setOpenCats(p => ({ ...p, [key]: !p[key] }));
+
+  const addItem = (catKey) => {
+    const val = (addInputs[catKey] || "").trim().toLowerCase();
     if (!val) return;
     setPantry(prev => {
-      const existing = prev[selectedCat] || [];
+      const existing = prev[catKey] || [];
       if (existing.includes(val)) return prev;
-      return { ...prev, [selectedCat]: [...existing, val] };
+      return { ...prev, [catKey]: [...existing, val] };
     });
-    setInput(""); inputRef.current?.focus();
+    setAddInputs(p => ({ ...p, [catKey]: "" }));
   };
 
   const removeItem = (cat, item) => setPantry(p => ({ ...p, [cat]: (p[cat] || []).filter(i => i !== item) }));
@@ -517,7 +525,6 @@ function PantryTab({ pantry, setPantry, categories, setCategories, pantryStatus,
     }
   };
 
-  const handleKeyDown = (e) => { if (e.key === "Enter" || e.key === ",") { e.preventDefault(); addItem(); } };
   const startEdit = (cat) => { setEditingCat(cat.key); setEditLabel(cat.label); };
   const saveEdit = (key) => {
     if (editLabel.trim()) setCategories(prev => prev.map(c => c.key === key ? { ...c, label: editLabel.trim() } : c));
@@ -529,13 +536,12 @@ function PantryTab({ pantry, setPantry, categories, setCategories, pantryStatus,
     if (hasItems && !window.confirm("This category has items. Delete anyway?")) return;
     setCategories(prev => prev.filter(c => c.key !== key));
     setPantry(prev => { const n = { ...prev }; delete n[key]; return n; });
-    if (selectedCat === key) setSelectedCat(categories.find(c => c.key !== key)?.key || "");
   };
 
   const handleAddCategory = (newCat) => {
     setCategories(prev => [...prev, newCat]);
     setPantry(prev => ({ ...prev, [newCat.key]: [] }));
-    setSelectedCat(newCat.key);
+    setOpenCats(p => ({ ...p, [newCat.key]: true }));
   };
 
   if (loading) return (
@@ -563,71 +569,79 @@ function PantryTab({ pantry, setPantry, categories, setCategories, pantryStatus,
           </span>
         </div>
       </div>
-      <div className="card">
-        <span className="input-label">Add Ingredient to Pantry</span>
-        <div className="pantry-add-row">
-          <select className="category-select" value={selectedCat} onChange={e => setSelectedCat(e.target.value)}>
-            {categories.map(c => <option key={c.key} value={c.key}>{c.emoji} {c.label}</option>)}
-          </select>
-          <input ref={inputRef} className="text-input" type="text"
-            placeholder="e.g. chicken, palm oil, ugwu..."
-            value={input} onChange={e => setInput(e.target.value)} onKeyDown={handleKeyDown} />
-          <button className="btn btn-primary" onClick={addItem}>+ Add</button>
-        </div>
-        <p style={{ fontSize: "0.78rem", color: "var(--muted)", marginTop: "4px" }}>Press Enter or comma to add quickly.</p>
-      </div>
-      <div className="pantry-categories">
+
+      <div>
         {categories.map(cat => {
           const items = pantry[cat.key] || [];
+          const isOpen = openCats[cat.key];
           return (
-            <div className="category-block" key={cat.key}>
-              <div className="category-heading" style={{ background: `${cat.color}15` }}>
-                <div className="category-heading-left">
-                  <div className="category-color-dot" style={{ background: cat.color }} />
+            <div className="acc-item" key={cat.key}>
+              <div className="acc-header" onClick={() => toggleCat(cat.key)}>
+                <div className="acc-header-left">
+                  <div style={{ width: "10px", height: "10px", borderRadius: "50%", background: cat.color, flexShrink: 0 }} />
                   <span style={{ fontSize: "1.1rem" }}>{cat.emoji}</span>
                   {editingCat === cat.key ? (
-                    <input className="category-name-input" value={editLabel}
+                    <input
+                      className="category-name-input"
+                      value={editLabel}
                       onChange={e => setEditLabel(e.target.value)}
                       onKeyDown={e => { if (e.key === "Enter") saveEdit(cat.key); if (e.key === "Escape") setEditingCat(null); }}
-                      onBlur={() => saveEdit(cat.key)} autoFocus />
+                      onBlur={() => saveEdit(cat.key)}
+                      onClick={e => e.stopPropagation()}
+                      autoFocus
+                    />
                   ) : (
-                    <span className="category-name-display">{cat.label}</span>
+                    <span className="acc-header-name">{cat.label}</span>
                   )}
-                  <span className="category-count">{items.length}</span>
+                  <span className="acc-header-count">{items.length}</span>
                 </div>
-                <div className="category-heading-right">
-                  {editingCat === cat.key
-                    ? <button className="btn btn-ghost btn-icon" onClick={() => saveEdit(cat.key)}>✓ Save</button>
-                    : <button className="btn btn-ghost btn-icon" onClick={() => startEdit(cat)}>✏ Rename</button>
-                  }
-                  <button className="btn btn-danger btn-icon" onClick={() => deleteCategory(cat.key)}>🗑</button>
+                <div className="acc-header-right">
+                  <button className="acc-cat-btn" onClick={e => { e.stopPropagation(); startEdit(cat); }}>✏ Rename</button>
+                  <button className="acc-cat-btn danger" onClick={e => { e.stopPropagation(); deleteCategory(cat.key); }}>🗑</button>
+                  <span className={`acc-arrow ${isOpen ? "open" : ""}`}>▾</span>
                 </div>
               </div>
-              <div className="category-items">
-                {items.length === 0
-                  ? <span className="category-empty">Nothing here yet — add some {cat.emoji}</span>
-                  : items.map(item => (
-                    <span key={item} className="pantry-tag" style={{ borderColor: `${cat.color}50` }}>
-                      {item}
-                      <span className="tag-remove" onClick={() => removeItem(cat.key, item)}>×</span>
-                    </span>
-                  ))
-                }
-              </div>
+              {isOpen && (
+                <div className="acc-body">
+                  <div className="acc-chips">
+                    {items.length === 0
+                      ? <span className="acc-empty">Nothing here yet — add some {cat.emoji}</span>
+                      : items.map(item => (
+                        <span key={item} className="acc-chip" style={{ borderColor: `${cat.color}50` }}>
+                          {item}
+                          <span className="acc-chip-x" onClick={() => removeItem(cat.key, item)}>×</span>
+                        </span>
+                      ))
+                    }
+                  </div>
+                  <div className="acc-add-row">
+                    <input
+                      className="acc-add-input"
+                      placeholder={`Add to ${cat.label}…`}
+                      value={addInputs[cat.key] || ""}
+                      onChange={e => setAddInputs(p => ({ ...p, [cat.key]: e.target.value }))}
+                      onKeyDown={e => { if (e.key === "Enter" || e.key === ",") { e.preventDefault(); addItem(cat.key); } }}
+                    />
+                    <button className="acc-add-btn" onClick={() => addItem(cat.key)}>+ Add</button>
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}
       </div>
+
       {totalItems > 0 && (
         <div className="pantry-cook-section">
           <h3>🍳 Ready to Cook?</h3>
-          <p>You have <strong>{totalItems} ingredients</strong> stored. Switch to <strong>Recipes</strong> and tap <strong>"Cook from My Pantry"</strong>.</p>
+          <p>You have <strong>{totalItems} ingredients</strong> stored. Switch to <strong>Recipes</strong> and tap <strong>"Cook from Pantry"</strong>.</p>
           <div className="pantry-ingredient-preview">
             {Object.values(pantry).flat().slice(0, 14).map(item => <span key={item} className="preview-pill">{item}</span>)}
             {totalItems > 14 && <span className="preview-pill">+{totalItems - 14} more</span>}
           </div>
         </div>
       )}
+
       {totalItems === 0 && (
         <div className="empty-state">
           <div className="empty-icon">🧺</div>
