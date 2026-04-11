@@ -165,7 +165,7 @@ function RecipeModal({ mealName, pantryItems, userTier, onClose, onUpgrade }) {
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify({
           model: "claude-sonnet-4-6",
-          max_tokens: 1000,
+          max_tokens: 1500,
           bypass_limit: true,
           system: RECIPE_SYSTEM_PROMPT,
           messages: [{ role: "user", content: `Give me the full recipe for: ${mealName}. User has these pantry items: ${pantryItems.join(", ") || "general pantry"}.` }]
@@ -174,7 +174,18 @@ function RecipeModal({ mealName, pantryItems, userTier, onClose, onUpgrade }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to fetch recipe");
       const text = data.content?.map(b => b.text || "").join("") || "";
-      const parsed = JSON.parse(text.replace(/```json|```/g, "").trim());
+      const cleaned = text.replace(/```json|```/g, "").trim();
+      let parsed;
+      try {
+        parsed = JSON.parse(cleaned);
+      } catch {
+        const fixed = cleaned.substring(0, cleaned.lastIndexOf("}") + 1) + "}";
+        try {
+          parsed = JSON.parse(fixed);
+        } catch {
+          throw new Error("Recipe response was incomplete. Please try again.");
+        }
+      }
       setRecipe(parsed);
     } catch (err) {
       setError(err.message);
