@@ -199,6 +199,8 @@ const style = `
   .upgrade-lock p { font-size: 0.88rem; color: var(--muted); margin-bottom: 20px; line-height: 1.6; }
   .upgrade-lock-btn { background: var(--orange); color: white; border: none; padding: 12px 28px; border-radius: 12px; font-family: 'Spectral', serif; font-size: 1rem; cursor: pointer; transition: all 0.2s; }
   .upgrade-lock-btn:hover { background: var(--orange-light); transform: translateY(-1px); }
+  .recipe-btn-row { display: grid; gap: 10px; grid-template-columns: 1fr 1.4fr; }
+  @media (max-width: 500px) { .recipe-btn-row { grid-template-columns: 1fr; } }
 `;
 
 const SWATCH_COLORS = ["#FF570A","#05B2DC","#2E5339","#3a6647","#ff7033","#29c4e8","#e04e00","#037a97","#1a3d25","#6aabbb"];
@@ -395,7 +397,7 @@ function RecipeTab({ pantryIngredients, userTier, onUpgrade }) {
         </select>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: allPantryItems.length > 0 ? "1fr 1.4fr" : "1fr", gap: "10px" }}>
+      <div className="recipe-btn-row" style={{ gridTemplateColumns: allPantryItems.length > 0 ? undefined : "1fr" }}>
         <button className="btn btn-primary btn-full" onClick={() => fetchRecipes(ingredients)} disabled={loading || !ingredients.length}>
           {loading ? <><div className="spinner" /> Finding…</> : "✦ Suggest Recipes"}
         </button>
