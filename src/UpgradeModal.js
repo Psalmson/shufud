@@ -47,7 +47,7 @@ const upgradeStyle = `
   .upgrade-header { background: var(--green); padding: 28px 32px 24px; text-align: center; position: relative; }
   .upgrade-header h2 { font-family: 'Spectral', serif; color: white; font-size: 1.6rem; margin-bottom: 8px; }
   .upgrade-header p { color: rgba(255,255,255,0.8); font-size: 0.92rem; line-height: 1.5; }
-  .upgrade-dismiss { position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.15); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+  .upgrade-dismiss { position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.15); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: background 0.2s; z-index: 10; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
   .upgrade-dismiss:hover { background: rgba(255,255,255,0.25); }
   .upgrade-body { padding: 24px 28px 32px; }
   .upgrade-tiers { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
