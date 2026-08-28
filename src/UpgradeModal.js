@@ -40,7 +40,7 @@ const TIERS = [
 const upgradeStyle = `
   @import url('https://fonts.googleapis.com/css2?family=Afacad+Flux:wght@100..1000&family=Spectral:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap');
 
-  .upgrade-overlay { position: fixed; inset: 0; background: rgba(15,31,20,0.7); display: flex; align-items: center; justify-content: center; z-index: 300; animation: upgradeFadeIn 0.2s ease; padding: 20px; overflow-y: auto; }
+  .upgrade-overlay { position: fixed; inset: 0; background: rgba(15,31,20,0.7); display: flex; align-items: flex-start; justify-content: center; z-index: 300; animation: upgradeFadeIn 0.2s ease; padding: 20px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
   @keyframes upgradeFadeIn { from { opacity: 0; } to { opacity: 1; } }
   .upgrade-modal { background: var(--warm-white); border-radius: 24px; width: 100%; max-width: 560px; box-shadow: 0 20px 60px rgba(15,31,20,0.25); animation: upgradeSlideUp 0.25s ease; overflow: hidden; }
   @keyframes upgradeSlideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
